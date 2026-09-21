@@ -1,0 +1,68 @@
+{
+  "scope": "Development-only paired rerun of all20 PersonaMem cases with corrected common caller and judge; no confirmation profiles",
+  "protocol_revision": "personamem-recommendation-policy-v2",
+  "selected_ids": [
+    "personamem-v2-554-c797b4cd04a49f39",
+    "personamem-v2-583-27fcd0f777fb134b",
+    "personamem-v2-543-2eae6d25d2615a98",
+    "personamem-v2-425-d01d773ce7f59e00",
+    "personamem-v2-948-8d21a166a67b2149",
+    "personamem-v2-184-dbbbc771e88c6c60",
+    "personamem-v2-687-21e5309acae1a3f5",
+    "personamem-v2-837-3649a8ee9091bb3e",
+    "personamem-v2-218-b7d3d0fccc9e4185",
+    "personamem-v2-275-4cab65eabc7b4765",
+    "personamem-v2-829-a5b7947af098baa1",
+    "personamem-v2-76-155acf0a54bc508d",
+    "personamem-v2-361-51f1878e157e44b0",
+    "personamem-v2-215-6bfe7054d58abda8",
+    "personamem-v2-678-1ad3e64911ade8f7",
+    "personamem-v2-54-8f7169cf560d0fd3",
+    "personamem-v2-120-f55ce1e7a0bb43b0",
+    "personamem-v2-767-407628bb7963425b",
+    "personamem-v2-652-e97d1d62f7fa4d54",
+    "personamem-v2-986-b4c5185a6de1cd7b"
+  ],
+  "dataset_sha256": "43e16b4768cb961e3e10daa8605b51b0f6d802bbdbacae91c7abc70333c6949b",
+  "arms": {
+    "baseline": {
+      "source_root": "work/upstream",
+      "commit": "199d4bc6662bd51c18275331ddeb51ac07387acf",
+      "source_sha256": "4c94832d0b37c635e70ca6fa82c47cda4d2b3aa997039eb7216c1ec8004393b1",
+      "schema_sha256": "16da52544e71e537a1db90d67f9b79d70b7ccc36c85f7beb06c0e5d3171fedbe"
+    },
+    "jev": {
+      "source_root": "work/atomic-prompt-candidate",
+      "commit": "748bd2329149466d785b21cbd06b2bc76eef5039",
+      "source_sha256": "183af1ec39b75157c200bfb6169ca1a147d3c3f52fff4567ba5ffb61e400689e",
+      "schema_sha256": "c774e4fa8669be5d8790fa63eec218ab420bb8cda64f368c6d034f71e11f6810"
+    }
+  },
+  "evaluator_commit": "d21280e378249b294e6748adb680e37265667a65",
+  "evaluator_sha256": {
+    "evaluate_agentic_memory.py": "c520789065968b1d2bf9113dd6e2aa5a47d218753431de91a88101b9fb62e198",
+    "evaluate_answers.py": "cbb748ffe05cb412517932e77abf3001b8e3ad22787fc7b9b12579615e5dacb4",
+    "evaluate_longmemeval.py": "bf27ed7035d68904df947a9a4f1a6308c22cb285862f89f410b14685cdd01f0c",
+    "personamem_caller.py": "3f524373fabc71ff9dc0e9e193c66c574f8dc41a65bb09bd83e8a2df61d7a697",
+    "personamem_judge.py": "3fc822e60463f00ceda26a30259617694dfa6a432d880f8c51f7fdd266b76a5d"
+  },
+  "prompt_sha256": {
+    "personamem_caller.py": "3f524373fabc71ff9dc0e9e193c66c574f8dc41a65bb09bd83e8a2df61d7a697",
+    "personamem_judge.py": "3fc822e60463f00ceda26a30259617694dfa6a432d880f8c51f7fdd266b76a5d"
+  },
+  "caller_model": "openai/gpt-5.6-luna",
+  "reasoning_effort": "high",
+  "judge_model": "openai/gpt-4.1",
+  "searches": 3,
+  "records": 20,
+  "context_chars": 120000,
+  "answer_max_tokens": 16384,
+  "chunk_chars": 6000,
+  "jev_workers": 128,
+  "caller_judge_budget_usd_per_arm": 0.5,
+  "embedding_budget_usd": 0.1,
+  "jev_budget_usd": 2,
+  "max_jev_requests": 100000,
+  "execution": "Run arms sequentially with one network evaluation active; preserve failures, completed prefixes and cumulative usage on same-plan retries.",
+  "analysis": "Report all20 paired cases and preference-type metadata, original protocols retained. Count all retried Jev cases incorrect and baseline cases correct in a separate conservative supplement. No independent80percent claim from development. General knowledge may inform new recommendations in both arms, but personal facts require remembered evidence; judge only the target personalization criterion."
+}

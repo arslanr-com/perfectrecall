@@ -1,0 +1,60 @@
+{
+  "scope": "Conservative sensitivity only; does not replace primary grades",
+  "primary": {
+    "cases": 120,
+    "baseline_errors": 62,
+    "jev_errors": 17,
+    "baseline_error_rate": 0.5166666666666667,
+    "jev_error_rate": 0.14166666666666666,
+    "relative_error_reduction": 0.7258064516129032,
+    "repaired": 54,
+    "regressed": 9,
+    "paired_exact_one_sided_p": 3.0541397258443403e-09,
+    "observed_80_percent_reduction": false
+  },
+  "conservative": {
+    "cases": 120,
+    "baseline_errors": 61,
+    "jev_errors": 18,
+    "baseline_error_rate": 0.5083333333333333,
+    "jev_error_rate": 0.15,
+    "relative_error_reduction": 0.7049180327868853,
+    "repaired": 52,
+    "regressed": 9,
+    "paired_exact_one_sided_p": 9.014011891940454e-09,
+    "observed_80_percent_reduction": false
+  },
+  "primary_family_test": {
+    "families": 119,
+    "cases": 120,
+    "observed_error_difference": 45,
+    "family_sign_flip_one_sided_p": 3.0541397258443403e-09,
+    "method": "Paired arm exchange within entire question families; includes answerable/absent variants in one block."
+  },
+  "conservative_family_test": {
+    "families": 119,
+    "cases": 120,
+    "observed_error_difference": 43,
+    "family_sign_flip_one_sided_p": 9.014011891940454e-09,
+    "method": "Paired arm exchange within entire question families; includes answerable/absent variants in one block."
+  },
+  "adjusted_cases": [
+    {
+      "backend": "baseline",
+      "case_id": "gpt4_7f6b06db"
+    },
+    {
+      "backend": "jev",
+      "case_id": "01493427"
+    },
+    {
+      "backend": "jev",
+      "case_id": "6e984302"
+    }
+  ],
+  "interpretation": "Every retried baseline case is assumed correct; every retried Jev case is assumed incorrect. All original cases remain in the denominator.",
+  "input_sha256": {
+    "comparison": "56a58a5d7bf7fa9dd172dc0af976df11b2995ae27f3a4e3e9d754527d1a32d91",
+    "audit": "156ab552def09f67b3b737703f8523b093738fd136a09f710f740c9c1533bca2"
+  }
+}

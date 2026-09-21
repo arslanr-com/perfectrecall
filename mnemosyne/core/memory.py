@@ -1,0 +1,1412 @@
+"""PerfectRecall public memory API and Mnemosyne-compatible SQLite storage."""
+
+import sqlite3
+import json
+import hashlib
+import logging
+import threading
+import tempfile
+from datetime import datetime, timezone
+from typing import List, Dict, Optional, Any
+from pathlib import Path
+import os
+
+logger = logging.getLogger(__name__)
+from mnemosyne.core import beam as beam_module
+from mnemosyne.core._connection_gc import collect_connection_cycles
+from mnemosyne.core.beam import BeamMemory, _BeamConnection, _deferred_commits
+from mnemosyne.core.journal import journal_mode
+
+_thread_local = threading.local()
+_DEFAULT_ROOT = Path(
+    os.environ.get("HERMES_HOME")
+    or (
+        Path(os.environ["HOME"]) / ".hermes"
+        if os.environ.get("HOME")
+        else Path.home() / ".hermes"
+    )
+)
+DEFAULT_DATA_DIR = _DEFAULT_ROOT / "mnemosyne" / "data"
+DEFAULT_DB_PATH = DEFAULT_DATA_DIR / "mnemosyne.db"
+_EXPORTED_SURFACES = {
+    "working_memory": (
+        "working_memory",
+        {
+            "id",
+            "content",
+            "source",
+            "timestamp",
+            "session_id",
+            "importance",
+            "metadata_json",
+            "valid_until",
+            "superseded_by",
+            "scope",
+            "recall_count",
+            "last_recalled",
+            "created_at",
+            "veracity",
+            "consolidated_at",
+            "consolidation_claimed_at",
+            "event_date",
+            "event_date_precision",
+            "pinned",
+        },
+    ),
+    "episodic_memory": (
+        "episodic_memory",
+        {
+            "rowid",
+            "id",
+            "content",
+            "source",
+            "timestamp",
+            "session_id",
+            "importance",
+            "metadata_json",
+            "summary_of",
+            "valid_until",
+            "superseded_by",
+            "scope",
+            "recall_count",
+            "last_recalled",
+            "created_at",
+            "event_date",
+            "event_date_precision",
+        },
+    ),
+    "scratchpad": (
+        "scratchpad",
+        {"id", "content", "session_id", "created_at", "updated_at"},
+    ),
+    "consolidation_log": (
+        "consolidation_log",
+        {"id", "session_id", "items_consolidated", "summary_preview", "created_at"},
+    ),
+    "legacy_memories": (
+        "memories",
+        {
+            "id",
+            "content",
+            "source",
+            "timestamp",
+            "session_id",
+            "importance",
+            "metadata_json",
+            "created_at",
+        },
+    ),
+    "legacy_embeddings": (
+        "memory_embeddings",
+        {"memory_id", "embedding_json", "model", "created_at"},
+    ),
+    "triples": (
+        "triples",
+        {
+            "id",
+            "subject",
+            "predicate",
+            "object",
+            "valid_from",
+            "valid_until",
+            "source",
+            "confidence",
+            "created_at",
+        },
+    ),
+    "annotations": (
+        "annotations",
+        {"id", "memory_id", "kind", "value", "source", "confidence", "created_at"},
+    ),
+    "canonical_facts": (
+        "canonical_facts",
+        {
+            "id",
+            "owner_id",
+            "category",
+            "name",
+            "body",
+            "source",
+            "confidence",
+            "version",
+            "valid_from",
+            "valid_until",
+            "created_at",
+        },
+    ),
+    "sync_events": (
+        "memory_events",
+        {
+            "event_id",
+            "memory_id",
+            "operation",
+            "timestamp",
+            "device_id",
+            "payload",
+            "parent_event_ids",
+            "importance",
+            "expiry",
+            "event_hash",
+            "synced_at",
+        },
+    ),
+}
+_REBUILDABLE_EXPORT_PREFIXES = ("fts_", "vec_")
+_OMITTED_EXPORT_GUIDANCE = {
+    "facts": "Derived recall facts are not included; rerun extraction after restore.",
+    "gists": "Episodic graph summaries are not included; rerun graph extraction after restore.",
+    "graph_edges": "Episodic graph edges are not included; rerun graph extraction after restore.",
+    "consolidated_facts": "Veracity consolidation output is not included; rerun consolidation after restore.",
+    "conflicts": "Veracity conflict history is not included; rerun consolidation after restore.",
+    "memory_events": "Sync events are omitted unless export uses --include-sync-events.",
+}
+
+
+def _quoted_identifier(identifier: str) -> str:
+    """Quote a SQLite identifier from sqlite_master safely."""
+    return '"' + identifier.replace('"', '""') + '"'
+
+
+_UNKNOWN_RESTORE_DEFAULT = object()
+
+
+def _sqlite_restore_default(default_sql: Optional[str]) -> Any:
+    """Decode SQLite literal defaults without evaluating schema-supplied SQL."""
+    if default_sql is None:
+        return None
+    default_sql = default_sql.strip()
+    while default_sql.startswith("(") and default_sql.endswith(")"):
+        default_sql = default_sql[1:-1].strip()
+    upper = default_sql.upper()
+    if upper == "NULL":
+        return None
+    if upper == "TRUE":
+        return 1
+    if upper == "FALSE":
+        return 0
+    if (
+        len(default_sql) >= 2
+        and default_sql[0] in "\"'"
+        and (default_sql[-1] == default_sql[0])
+    ):
+        quote = default_sql[0]
+        return default_sql[1:-1].replace(quote * 2, quote)
+    if len(default_sql) >= 3 and upper.startswith("X'") and default_sql.endswith("'"):
+        try:
+            return bytes.fromhex(default_sql[2:-1])
+        except ValueError:
+            return _UNKNOWN_RESTORE_DEFAULT
+    try:
+        return int(default_sql)
+    except ValueError:
+        try:
+            return float(default_sql)
+        except ValueError:
+            return _UNKNOWN_RESTORE_DEFAULT
+
+
+def _export_completeness(
+    conn: sqlite3.Connection, *, include_sync_events: bool
+) -> Dict[str, Any]:
+    """Describe persisted values the portable JSON export does not carry."""
+    exported_tables = {
+        table
+        for section, (table, _) in _EXPORTED_SURFACES.items()
+        if include_sync_events or section != "sync_events"
+    }
+    omitted_surfaces = []
+    partial_surfaces = []
+    catalog = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
+    ).fetchall()
+    for (table,) in catalog:
+        if table.startswith(_REBUILDABLE_EXPORT_PREFIXES):
+            continue
+        row_count = int(
+            conn.execute(
+                f"SELECT COUNT(*) FROM {_quoted_identifier(table)}"
+            ).fetchone()[0]
+        )
+        if not row_count:
+            continue
+        if table not in exported_tables:
+            omitted_surfaces.append(
+                {
+                    "table": table,
+                    "row_count": row_count,
+                    "rebuild_guidance": _OMITTED_EXPORT_GUIDANCE.get(
+                        table,
+                        "This persisted surface is not included in the portable JSON export; preserve the source database until dedicated portability support exists.",
+                    ),
+                }
+            )
+            continue
+        section, (_, exported_fields) = next(
+            (
+                (name, surface)
+                for name, surface in _EXPORTED_SURFACES.items()
+                if surface[0] == table
+            )
+        )
+        actual_fields = {
+            row[1]: row[4]
+            for row in conn.execute(f"PRAGMA table_info({_quoted_identifier(table)})")
+        }
+        omitted_fields = []
+        for field in sorted(set(actual_fields) - exported_fields):
+            restore_default = _sqlite_restore_default(actual_fields[field])
+            if restore_default is _UNKNOWN_RESTORE_DEFAULT:
+                predicate = f"{_quoted_identifier(field)} IS NOT NULL"
+                params = ()
+            else:
+                predicate = f"{_quoted_identifier(field)} IS NOT ?"
+                params = (restore_default,)
+            affected_rows = int(
+                conn.execute(
+                    f"SELECT COUNT(*) FROM {_quoted_identifier(table)} WHERE {predicate}",
+                    params,
+                ).fetchone()[0]
+            )
+            if affected_rows:
+                omitted_fields.append({"field": field, "affected_rows": affected_rows})
+        if omitted_fields:
+            partial_surfaces.append(
+                {
+                    "section": section,
+                    "table": table,
+                    "row_count": row_count,
+                    "omitted_fields": omitted_fields,
+                }
+            )
+    omitted_surfaces.sort(key=lambda surface: surface["table"])
+    partial_surfaces.sort(key=lambda surface: surface["section"])
+    return {
+        "complete": not omitted_surfaces and (not partial_surfaces),
+        "omitted_surfaces": omitted_surfaces,
+        "partial_surfaces": partial_surfaces,
+    }
+
+
+if os.environ.get("MNEMOSYNE_DATA_DIR"):
+    DEFAULT_DATA_DIR = Path(os.environ.get("MNEMOSYNE_DATA_DIR"))
+    DEFAULT_DB_PATH = DEFAULT_DATA_DIR / "mnemosyne.db"
+
+
+def _default_data_dir() -> Path:
+    """Return the current default data directory, honoring runtime env changes."""
+    if os.environ.get("MNEMOSYNE_DATA_DIR"):
+        return Path(os.environ["MNEMOSYNE_DATA_DIR"])
+    return DEFAULT_DATA_DIR
+
+
+def _default_db_path() -> Path:
+    """Return the current default DB path, honoring runtime env changes."""
+    return _default_data_dir() / "mnemosyne.db"
+
+
+def _get_connection(db_path=None) -> sqlite3.Connection:
+    """Get thread-local database connection"""
+    path = (Path(db_path) if db_path else _default_db_path()).expanduser().resolve()
+    needs_reconnect = (
+        not hasattr(_thread_local, "conn")
+        or _thread_local.conn is None
+        or getattr(_thread_local, "db_path", None) != str(path)
+    )
+    if not needs_reconnect:
+        try:
+            _thread_local.conn.execute("SELECT 1")
+        except Exception:
+            needs_reconnect = True
+    if needs_reconnect:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        _thread_local.conn = sqlite3.connect(
+            str(path), check_same_thread=False, factory=_BeamConnection
+        )
+        _thread_local.conn.row_factory = sqlite3.Row
+        _thread_local.conn.execute(f"PRAGMA journal_mode={journal_mode()}")
+        _thread_local.conn.execute("PRAGMA busy_timeout=5000")
+        _thread_local.conn.execute("PRAGMA foreign_keys=ON")
+        sqlite_vec = None
+        _thread_local.db_path = str(path)
+        collect_connection_cycles()
+    beam_module._thread_local.conn = _thread_local.conn
+    beam_module._thread_local.db_path = str(path)
+    return _thread_local.conn
+
+
+def _close_dry_run_clone(
+    thread_local_states: List[tuple[Any, Dict[str, Any]]],
+    clone_store_connections: List[Any],
+    clone_query_caches: List[Any],
+) -> None:
+    """Close clone-only resources and restore caller-owned thread-local state."""
+    closed_query_caches = set()
+    for cache in clone_query_caches:
+        if id(cache) in closed_query_caches:
+            continue
+        closed_query_caches.add(id(cache))
+        try:
+            cache.close()
+        except Exception:
+            pass
+    closed_connections = set()
+    for connection in clone_store_connections:
+        if id(connection) in closed_connections:
+            continue
+        closed_connections.add(id(connection))
+        try:
+            connection.close()
+        except Exception:
+            pass
+    for local, original_state in thread_local_states:
+        connection = getattr(local, "conn", None)
+        if connection is not None and connection is not original_state.get("conn"):
+            try:
+                connection.close()
+            except Exception:
+                pass
+        try:
+            for attribute in list(vars(local)):
+                delattr(local, attribute)
+            for attribute, value in original_state.items():
+                setattr(local, attribute, value)
+        except Exception:
+            logger.debug(
+                "Unable to fully restore dry-run thread-local state", exc_info=True
+            )
+
+
+def init_db(db_path: Path = None):
+    """Initialize legacy and BEAM schemas under the same path lock."""
+    with beam_module._schema_init_lock(
+        db_path if db_path is not None else _default_db_path()
+    ) as path:
+        _init_db_locked(path)
+
+
+def _init_db_locked(db_path):
+    conn = _get_connection(db_path)
+    cursor = conn.cursor()
+    cursor.execute(
+        "\n        CREATE TABLE IF NOT EXISTS memories (\n            id TEXT PRIMARY KEY,\n            content TEXT NOT NULL,\n            source TEXT,\n            timestamp TEXT,\n            session_id TEXT DEFAULT 'default',\n            importance REAL DEFAULT 0.5,\n            metadata_json TEXT,\n            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n        )\n    "
+    )
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_session ON memories(session_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON memories(timestamp)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_source ON memories(source)")
+    cursor.execute(
+        "\n        CREATE TABLE IF NOT EXISTS memory_embeddings (\n            memory_id TEXT PRIMARY KEY,\n            embedding_json TEXT NOT NULL,\n            model TEXT DEFAULT 'legacy',\n            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n        )\n    "
+    )
+    conn.commit()
+    beam_module._init_beam_locked(db_path)
+
+
+init_db()
+
+
+def generate_id(content: str) -> str:
+    """Generate unique ID for memory"""
+    return hashlib.sha256(
+        f"{content}{datetime.now().isoformat()}".encode()
+    ).hexdigest()[:16]
+
+
+class Mnemosyne:
+    """
+    Native memory interface - no HTTP, direct SQLite.
+    Now backed by BEAM architecture for scalable retrieval.
+
+    Supports memory bank isolation via the `bank` parameter.
+    Each bank is a separate SQLite database for complete isolation.
+    """
+
+    def __init__(
+        self,
+        session_id: str = "default",
+        db_path: Path = None,
+        bank: str = None,
+        author_id: str = None,
+        author_type: str = None,
+        channel_id: str = None,
+    ):
+        from mnemosyne.core.config import get_config
+
+        get_config()
+        self.session_id = session_id
+        self.bank = bank or "default"
+        self.author_id = author_id
+        self.author_type = author_type
+        self.channel_id = channel_id or session_id
+        if db_path:
+            self.db_path = db_path
+        elif bank and bank != "default":
+            from mnemosyne.core.banks import BankManager
+
+            self.db_path = BankManager().get_bank_db_path(bank)
+        else:
+            self.db_path = _default_db_path()
+        init_db(self.db_path)
+        self.conn = _get_connection(self.db_path)
+        self._stream = None
+        self._compressor = None
+        self._pattern_detector = None
+        self._delta_sync = None
+        self._plugin_manager = None
+        self.beam = BeamMemory(
+            session_id=session_id,
+            db_path=self.db_path,
+            author_id=author_id,
+            author_type=author_type,
+            channel_id=channel_id,
+            event_emitter=self._stream_emit,
+        )
+        self.init_result = self.beam.init_result
+
+    @property
+    def stream(self):
+        """Lazy-initialized memory event stream."""
+        if self._stream is None:
+            from mnemosyne.core.streaming import MemoryStream
+
+            self._stream = MemoryStream()
+        return self._stream
+
+    def enable_streaming(self) -> "Mnemosyne":
+        """Enable event streaming for this memory instance.
+
+        Wires the stream into BeamMemory so all write operations emit events.
+        Call once after construction to activate the streaming subsystem.
+        """
+        _ = self.stream
+        if self.beam._event_emitter is None:
+            self.beam._event_emitter = self._stream_emit
+        return self
+
+    def _stream_emit(self, event) -> None:
+        """Callback passed to BeamMemory; routes events to the lazy-init stream."""
+        if self._stream is not None:
+            self._stream.emit(event)
+
+    @property
+    def compressor(self):
+        """Lazy-initialized memory compressor."""
+        if self._compressor is None:
+            from mnemosyne.core.patterns import MemoryCompressor
+
+            self._compressor = MemoryCompressor()
+        return self._compressor
+
+    def compress(self, content: str, method: str = "auto"):
+        """Compress memory content. Returns (compressed, stats)."""
+        return self.compressor.compress(content, method=method)
+
+    def decompress(self, content: str, method: str = "dict") -> str:
+        """Decompress memory content."""
+        return self.compressor.decompress(content, method=method)
+
+    def compress_memories(self, memories: list, method: str = "auto"):
+        """Compress a batch of memories. Returns (compressed_memories, stats)."""
+        return self.compressor.compress_batch(memories, method=method)
+
+    @property
+    def patterns(self):
+        """Lazy-initialized pattern detector."""
+        if self._pattern_detector is None:
+            from mnemosyne.core.patterns import PatternDetector
+
+            self._pattern_detector = PatternDetector()
+        return self._pattern_detector
+
+    def detect_patterns(self, memories: list = None) -> list:
+        """Detect patterns in memories. Uses all working+episodic if none provided."""
+        if memories is None:
+            memories = self.get_all_memories()
+        return self.patterns.detect_all(memories)
+
+    def summarize_patterns(self, memories: list = None) -> dict:
+        """Generate a summary of detected patterns."""
+        if memories is None:
+            memories = self.get_all_memories()
+        return self.patterns.summarize_patterns(memories)
+
+    def get_all_memories(self) -> List[Dict]:
+        """Return all working + episodic rows for pattern analysis.
+
+        Scoped to the active session (and global memories), with the same
+        validity filters that get_context() and recall() apply: invalidated
+        and expired memories are excluded so retracted notes do not skew
+        pattern detection.
+        """
+        now = datetime.now(timezone.utc).isoformat()
+        cursor = self.beam.conn.cursor()
+        cursor.execute(
+            "\n            SELECT id, content, source, timestamp, session_id, importance\n            FROM working_memory\n            WHERE (session_id = ? OR scope = 'global')\n              AND (valid_until IS NULL OR julianday(valid_until) > julianday(?))\n              AND superseded_by IS NULL\n        ",
+            (self.session_id, now),
+        )
+        rows = [dict(row) for row in cursor.fetchall()]
+        seen_ids = {r["id"] for r in rows}
+        cursor.execute(
+            "\n            SELECT id, content, source, timestamp, session_id, importance\n            FROM episodic_memory\n            WHERE (session_id = ? OR scope = 'global')\n              AND (valid_until IS NULL OR julianday(valid_until) > julianday(?))\n              AND superseded_by IS NULL\n        ",
+            (self.session_id, now),
+        )
+        for row in cursor.fetchall():
+            if row["id"] not in seen_ids:
+                rows.append(dict(row))
+        return rows
+
+    @property
+    def delta_sync(self):
+        """Lazy-initialized delta sync."""
+        if self._delta_sync is None:
+            from mnemosyne.core.streaming import DeltaSync
+
+            self._delta_sync = DeltaSync(self)
+        return self._delta_sync
+
+    def sync_to(self, peer_id: str, table: str = "working_memory") -> dict:
+        """Compute delta for a peer. Returns {peer_id, table, delta, count}."""
+        return self.delta_sync.sync_to(peer_id, table)
+
+    def sync_from(
+        self, peer_id: str, delta: list, table: str = "working_memory"
+    ) -> dict:
+        """Apply delta from a peer. Returns {peer_id, table, stats, checkpoint}."""
+        return self.delta_sync.sync_from(peer_id, delta, table)
+
+    @property
+    def plugins(self):
+        """Lazy-initialized plugin manager."""
+        if self._plugin_manager is None:
+            from mnemosyne.core.plugins import PluginManager
+
+            self._plugin_manager = PluginManager()
+        return self._plugin_manager
+
+    @plugins.setter
+    def plugins(self, manager):
+        """Attach an external PluginManager."""
+        self._plugin_manager = manager
+
+    def remember(
+        self,
+        content: str,
+        source: str = "conversation",
+        importance: float = 0.5,
+        metadata: Dict = None,
+        valid_until: str = None,
+        scope: str = "session",
+        extract_entities: bool = False,
+        extract: bool = False,
+        veracity: str = "unknown",
+        trust_tier: str = None,
+        memory_type: str = None,
+        dedupe: bool = True,
+    ) -> str:
+        """
+        Store a memory directly to SQLite.
+        Writes to both BEAM working_memory and legacy memories table.
+
+        Args:
+            extract_entities: If True, extract entities from content and store
+                in the AnnotationStore (kind='mentions') for fuzzy entity-aware
+                recall. Default False. (Pre-E6 wrote to TripleStore; the storage
+                target moved as part of E6 — see mnemosyne.core.annotations.)
+            extract: If True, extract structured facts from content using LLM
+                and store in the AnnotationStore (kind='fact'). Default False.
+            trust_tier: Trust classification for prompt-injection defense.
+                None = use beam default ('STATED'). 'EXTERNAL_WRITE' for MCP
+                tool calls, 'IMPORTED' for bulk imports.
+            memory_type: Optional explicit MemoryType value; overrides the
+                content classifier. See BeamMemory.remember.
+            dedupe: When False, always write a new row instead of folding into
+                an exact content match. See BeamMemory.remember.
+
+        Returns:
+            memory_id on success, or None if the content was filtered by
+            the write classifier (noise pattern or secret detection).
+
+        Note for programmatic writers: this facade can return None, because
+        the write filter below may veto the content outright. It also does not
+        accept a caller-supplied memory_id. Callers that must observe every
+        write and control its id -- media ingest, importers -- should call
+        BeamMemory.remember directly rather than going through here.
+        """
+        from mnemosyne.core.filters import should_remember
+
+        should_write, _decision = should_remember(content)
+        if not should_write:
+            logger.debug("Memory write filtered: %s", _decision.reason)
+            return None
+        from mnemosyne.core.content_sanitizer import sanitize_content as _sanitize
+
+        sanitized_content, blob_meta = _sanitize(content)
+        if blob_meta:
+            metadata = (metadata or {}).copy()
+            metadata["_blob"] = blob_meta
+        _content = sanitized_content if blob_meta else content
+        import re
+
+        dates = re.findall("\\b\\d{4}-\\d{2}-\\d{2}\\b", _content)
+        durations = re.findall(
+            "\\b\\d+\\s(?:days|weeks|months|years)\\b", _content, re.IGNORECASE
+        )
+        if dates or durations:
+            metadata = (metadata or {}).copy()
+            if dates:
+                metadata["_dates"] = dates
+            if durations:
+                metadata["_durations"] = durations
+        with _deferred_commits(self.conn):
+            memory_id = self.beam.remember(
+                _content,
+                source=source,
+                importance=importance,
+                metadata=metadata,
+                valid_until=valid_until,
+                scope=scope,
+                extract_entities=extract_entities,
+                extract=extract,
+                veracity=veracity,
+                trust_tier=trust_tier,
+                memory_type=memory_type,
+                dedupe=dedupe,
+            )
+            if memory_id is None:
+                return None
+            timestamp = datetime.now().isoformat()
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "\n                INSERT OR REPLACE INTO memories (id, content, source, timestamp, session_id, importance, metadata_json)\n                VALUES (?, ?, ?, ?, ?, ?, ?)\n            ",
+                (
+                    memory_id,
+                    _content,
+                    source,
+                    timestamp,
+                    self.session_id,
+                    importance,
+                    json.dumps(metadata or {}),
+                ),
+            )
+            self.conn.commit()
+        return memory_id
+
+    def recall(
+        self,
+        query: str,
+        top_k: int = 5,
+        *,
+        from_date: Optional[str] = None,
+        to_date: Optional[str] = None,
+        source: Optional[str] = None,
+        topic: Optional[str] = None,
+        author_id: Optional[str] = None,
+        author_type: Optional[str] = None,
+        channel_id: Optional[str] = None,
+        temporal_weight: float = 0.0,
+        query_time: Optional[Any] = None,
+        temporal_halflife: Optional[float] = None,
+        vec_weight: float = None,
+        fts_weight: float = None,
+        importance_weight: float = None,
+        explain: bool = False,
+        evidence_questions: Optional[List[str]] = None,
+    ) -> List[Dict]:
+        "Recall memories through Jev. Legacy scoring weights are accepted for API compatibility."
+        evidence_kwargs = (
+            {"evidence_questions": evidence_questions}
+            if evidence_questions is not None
+            else {}
+        )
+        import os as _os
+
+        if _os.environ.get("MNEMOSYNE_ENHANCED_RECALL", "0") == "1":
+            return self.beam.recall_enhanced(
+                query,
+                top_k=top_k,
+                from_date=from_date,
+                to_date=to_date,
+                source=source,
+                topic=topic,
+                author_id=author_id,
+                author_type=author_type,
+                channel_id=channel_id,
+                temporal_weight=temporal_weight,
+                query_time=query_time,
+                temporal_halflife=temporal_halflife,
+                vec_weight=vec_weight,
+                fts_weight=fts_weight,
+                importance_weight=importance_weight,
+                explain=explain,
+                **evidence_kwargs,
+            )
+        return self.beam.recall(
+            query,
+            top_k=top_k,
+            from_date=from_date,
+            to_date=to_date,
+            source=source,
+            topic=topic,
+            author_id=author_id,
+            author_type=author_type,
+            channel_id=channel_id,
+            temporal_weight=temporal_weight,
+            query_time=query_time,
+            temporal_halflife=temporal_halflife,
+            vec_weight=vec_weight,
+            fts_weight=fts_weight,
+            importance_weight=importance_weight,
+            explain=explain,
+            **evidence_kwargs,
+        )
+
+    def _emit_wrapper(self, event_type: str, memory_id: str, **kwargs) -> None:
+        """Emit a streaming event through the Mnemosyne wrapper layer."""
+        if self._stream is not None:
+            try:
+                from mnemosyne.core.streaming import MemoryEvent, EventType
+
+                evt = EventType[event_type]
+                event = MemoryEvent(
+                    event_type=evt,
+                    memory_id=memory_id,
+                    session_id=self.session_id,
+                    **kwargs,
+                )
+                self._stream.emit(event)
+            except Exception:
+                pass
+
+    def get_context(self, limit: int = 10) -> List[Dict]:
+        """
+        Get recent memories from current session for context injection.
+        Pulls from BEAM working_memory.
+        """
+        return self.beam.get_context(limit=limit)
+
+    def get_stats(
+        self, author_id: str = None, author_type: str = None, channel_id: str = None
+    ) -> Dict:
+        """Get memory system statistics (legacy + BEAM). Supports multi-agent identity filters."""
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM memories")
+        total_legacy = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(DISTINCT session_id) FROM memories")
+        sessions = cursor.fetchone()[0]
+        cursor.execute("SELECT source, COUNT(*) FROM memories GROUP BY source")
+        sources = {row[0]: row[1] for row in cursor.fetchall()}
+        cursor.execute("SELECT timestamp FROM memories ORDER BY timestamp DESC LIMIT 1")
+        last = cursor.fetchone()
+        beam_wm = self.beam.get_working_stats(
+            author_id=author_id, author_type=author_type, channel_id=channel_id
+        )
+        beam_ep = self.beam.get_episodic_stats(
+            author_id=author_id, author_type=author_type, channel_id=channel_id
+        )
+        triple_total = 0
+        try:
+            cursor.execute("SELECT COUNT(*) FROM triples")
+            triple_total = cursor.fetchone()[0]
+        except sqlite3.OperationalError as e:
+            if "no such table" not in str(e).lower():
+                raise
+        try:
+            from mnemosyne.core.banks import BankManager
+
+            banks = BankManager(data_dir=Path(self.db_path).parent).list_banks()
+        except Exception:
+            banks = ["default"]
+        return {
+            "total_memories": total_legacy,
+            "total_sessions": sessions,
+            "sources": sources,
+            "last_memory": last[0] if last else None,
+            "database": str(self.db_path),
+            "mode": "beam",
+            "banks": banks,
+            "beam": {
+                "working_memory": beam_wm,
+                "episodic_memory": beam_ep,
+                "triples": {"total": triple_total},
+            },
+        }
+
+    def get(self, memory_id: str) -> Optional[Dict]:
+        """Retrieve a single memory by its primary key.
+        Pure read, no side effects.
+        Delegates to BeamMemory.get() which checks working_memory
+        first (fast path), then episodic_memory (fallback)."""
+        return self.beam.get(memory_id)
+
+    def forget(self, memory_id: str) -> bool:
+        """Delete a memory by ID from legacy table and working_memory."""
+        with _deferred_commits(self.conn):
+            cursor = self.conn.cursor()
+            owner = cursor.execute(
+                "\n                SELECT session_id FROM working_memory\n                WHERE id = ? AND (session_id = ? OR scope = 'global')\n                ",
+                (memory_id, self.session_id),
+            ).fetchone()
+            if owner is None:
+                legacy_owner = cursor.execute(
+                    "SELECT 1 FROM memories WHERE id = ? AND session_id = ?",
+                    (memory_id, self.session_id),
+                ).fetchone()
+                if legacy_owner is None:
+                    return False
+                cursor.execute(
+                    "DELETE FROM memories WHERE id = ? AND session_id = ?",
+                    (memory_id, self.session_id),
+                )
+                self.conn.commit()
+                result = False
+            else:
+                cursor.execute(
+                    "DELETE FROM memories WHERE id = ? AND session_id = ?",
+                    (memory_id, owner["session_id"]),
+                )
+                self.conn.commit()
+                result = self.beam.forget_working(memory_id)
+        self._emit_wrapper("MEMORY_INVALIDATED", memory_id)
+        return result
+
+    def update(
+        self, memory_id: str, content: str = None, importance: float = None
+    ) -> bool:
+        """Update an existing memory in legacy table and BEAM."""
+        cursor = self.conn.cursor()
+        updates = []
+        params = []
+        if content is not None:
+            updates.append("content = ?")
+            params.append(content)
+        if importance is not None:
+            updates.append("importance = ?")
+            params.append(importance)
+        if not updates:
+            return False
+        params.extend([memory_id, self.session_id])
+        with _deferred_commits(self.conn):
+            cursor.execute(
+                f"UPDATE memories SET {', '.join(updates)} WHERE id = ? AND session_id = ?",
+                params,
+            )
+            self.conn.commit()
+            self.beam.update_working(memory_id, content=content, importance=importance)
+        self._emit_wrapper(
+            "MEMORY_UPDATED", memory_id, content=content, importance=importance
+        )
+        return cursor.rowcount > 0
+
+    def invalidate(self, memory_id: str, replacement_id: str = None) -> bool:
+        """Mark a memory as expired or superseded. Delegates to BEAM."""
+        result = self.beam.invalidate(memory_id, replacement_id=replacement_id)
+        if result:
+            self._emit_wrapper(
+                "MEMORY_INVALIDATED", memory_id, replacement_id=replacement_id
+            )
+        return result
+
+    def sleep(self, dry_run: bool = False, force: bool = False) -> Dict:
+        """Run consolidation sleep cycle for the current session."""
+        return self.beam.sleep(dry_run=dry_run, force=force)
+
+    def sleep_all_sessions(self, dry_run: bool = False, force: bool = False) -> Dict:
+        """Run consolidation sleep cycle across all sessions with eligible old working memories."""
+        return self.beam.sleep_all_sessions(dry_run=dry_run, force=force)
+
+    def reindex_vectors(
+        self, *, batch_size: int = 64, dry_run: bool = False, progress=None
+    ) -> Dict:
+        raise NotImplementedError("PerfectRecall does not build vector indexes")
+
+    def reclaim_orphans(
+        self, dry_run: bool = False, stale_after_seconds: int = 3600, limit: int = 1000
+    ) -> Dict:
+        """Clear stale sleep claims that have no episodic summary."""
+        return self.beam.reclaim_orphans(
+            dry_run=dry_run, stale_after_seconds=stale_after_seconds, limit=limit
+        )
+
+    def scratchpad_write(self, content: str) -> str:
+        """Write to scratchpad."""
+        return self.beam.scratchpad_write(content)
+
+    def scratchpad_read(self) -> List[Dict]:
+        """Read scratchpad entries."""
+        return self.beam.scratchpad_read()
+
+    def scratchpad_clear(self):
+        """Clear scratchpad."""
+        self.beam.scratchpad_clear()
+
+    def consolidation_log(self, limit: int = 10) -> List[Dict]:
+        """Get consolidation history."""
+        return self.beam.get_consolidation_log(limit=limit)
+
+    def export_to_file(
+        self, output_path: str, include_sync_events: bool = False
+    ) -> Dict:
+        """
+        Export supported Mnemosyne data to a portable JSON file. The additive
+        completeness manifest discloses omitted persisted surfaces and fields,
+        so a successful file write never implies a lossless database backup.
+
+        Schema version 1.3 adds the always-present ``canonical_facts`` section.
+        1.2 (post-sync) adds an optional ``sync_events`` section. Previous
+        versions (1.0, 1.1, 1.2) are still importable; ``sync_events`` presence
+        is keyed off the section itself on import, not the version number.
+        """
+        from mnemosyne.core.triples import TripleStore
+        from mnemosyne.core.annotations import AnnotationStore
+        from mnemosyne.core.canonical import CanonicalStore
+        import json as _json
+
+        meta: Dict[str, Any] = {
+            "version": "1.3",
+            "export_date": datetime.now().isoformat(),
+            "source_db": str(self.db_path),
+        }
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT value FROM sync_meta WHERE key = 'device_id'")
+            row = cursor.fetchone()
+            if row and row[0]:
+                meta["device_id"] = row[0]
+        except Exception:
+            pass
+        export: Dict[str, Any] = {"mnemosyne_export": meta}
+        beam_data = self.beam.export_to_dict()
+        export["working_memory"] = beam_data.get("working_memory", [])
+        export["episodic_memory"] = beam_data.get("episodic_memory", [])
+        export["episodic_embeddings"] = beam_data.get("episodic_embeddings", [])
+        export["scratchpad"] = beam_data.get("scratchpad", [])
+        export["consolidation_log"] = beam_data.get("consolidation_log", [])
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "\n            SELECT id, content, source, timestamp, session_id, importance,\n                   metadata_json, created_at\n            FROM memories\n            ORDER BY session_id, timestamp\n        "
+        )
+        export["legacy_memories"] = [dict(row) for row in cursor.fetchall()]
+        cursor.execute(
+            "\n            SELECT memory_id, embedding_json, model, created_at\n            FROM memory_embeddings\n            ORDER BY memory_id\n        "
+        )
+        export["legacy_embeddings"] = [dict(row) for row in cursor.fetchall()]
+        triples = TripleStore(db_path=self.db_path)
+        export["triples"] = triples.export_all()
+        annotations = AnnotationStore(db_path=self.db_path)
+        export["annotations"] = annotations.export_all()
+        canonical = CanonicalStore(db_path=self.db_path)
+        export["canonical_facts"] = canonical.export_all()
+        if include_sync_events:
+            try:
+                cursor.execute(
+                    "\n                    SELECT event_id, memory_id, operation, timestamp,\n                           device_id, payload, parent_event_ids,\n                           importance, expiry, event_hash, synced_at\n                    FROM memory_events\n                    ORDER BY timestamp ASC\n                "
+                )
+                export["sync_events"] = [dict(row) for row in cursor.fetchall()]
+            except Exception:
+                export["sync_events"] = []
+        completeness = _export_completeness(
+            self.conn, include_sync_events=include_sync_events
+        )
+        meta["completeness"] = completeness
+        with open(output_path, "w", encoding="utf-8") as f:
+            _json.dump(export, f, indent=2, ensure_ascii=False, default=str)
+        return {
+            "status": "exported",
+            "path": output_path,
+            "complete": completeness["complete"],
+            "omitted_surfaces": completeness["omitted_surfaces"],
+            "partial_surfaces": completeness["partial_surfaces"],
+            "working_memory_count": len(export["working_memory"]),
+            "episodic_memory_count": len(export["episodic_memory"]),
+            "scratchpad_count": len(export["scratchpad"]),
+            "legacy_memories_count": len(export["legacy_memories"]),
+            "triples_count": len(export["triples"]),
+            "annotations_count": len(export["annotations"]),
+            "canonical_facts_count": len(export["canonical_facts"]),
+            "sync_events_count": len(export.get("sync_events", [])),
+        }
+
+    def import_from_file(
+        self,
+        input_path: str,
+        force: bool = False,
+        dry_run: bool = False,
+        _owned_store_connections: Optional[List[Any]] = None,
+    ) -> Dict:
+        """
+        Import Mnemosyne data from a JSON file produced by export_to_file().
+        Idempotent by default: skips existing records.
+        Set force=True to overwrite. Set dry_run=True to validate and return
+        the normal import statistics without changing the active database.
+        Returns import statistics.
+
+        Accepts schema versions 1.0 (pre-E6), 1.1 (post-E6), 1.2 (post-sync),
+        and 1.3 (canonical_facts).  When an export includes ``sync_events``,
+        those events are imported with idempotency based on ``event_hash``.
+        Sections absent from older exports are treated as no-ops.
+        """
+        if dry_run:
+            with tempfile.TemporaryDirectory(
+                prefix="mnemosyne-import-", dir=str(Path(self.db_path).parent)
+            ) as temp_dir:
+                clone_path = Path(temp_dir) / "mnemosyne.db"
+                clone_connection = sqlite3.connect(str(clone_path))
+                try:
+                    self.conn.backup(clone_connection)
+                finally:
+                    clone_connection.close()
+                from mnemosyne.core import beam as beam_module
+
+                thread_local_states = [
+                    (local, dict(vars(local)))
+                    for local in (_thread_local, beam_module._thread_local)
+                ]
+                clone_store_connections = []
+                caller_beam_query_cache = getattr(self.beam, "_query_cache", None)
+                isolated = None
+                try:
+                    isolated = Mnemosyne(
+                        session_id=self.session_id,
+                        db_path=clone_path,
+                        bank=self.bank,
+                        author_id=self.author_id,
+                        author_type=self.author_type,
+                        channel_id=self.channel_id,
+                    )
+                    return isolated.import_from_file(
+                        input_path,
+                        force=force,
+                        _owned_store_connections=clone_store_connections,
+                    )
+                finally:
+                    clone_query_caches = []
+                    if isolated is not None:
+                        cache = getattr(isolated.beam, "_query_cache", None)
+                        if cache is not None and cache is not caller_beam_query_cache:
+                            clone_query_caches.append(cache)
+                    for local, original_state in thread_local_states:
+                        cache = getattr(local, "_query_cache", None)
+                        if cache is not None and cache is not original_state.get(
+                            "_query_cache"
+                        ):
+                            clone_query_caches.append(cache)
+                    _close_dry_run_clone(
+                        thread_local_states, clone_store_connections, clone_query_caches
+                    )
+        from mnemosyne.core.triples import TripleStore
+        from mnemosyne.core.annotations import AnnotationStore
+        from mnemosyne.core.canonical import CanonicalStore
+        import json as _json
+
+        with open(input_path, "r", encoding="utf-8") as f:
+            data = _json.load(f)
+        if not isinstance(data, dict):
+            raise ValueError("Import file must contain a Mnemosyne export object")
+        meta = data.get("mnemosyne_export", {})
+        version = meta.get("version")
+        if version not in ("1.0", "1.1", "1.2", "1.3"):
+            raise ValueError(f"Unsupported export version: {version}")
+        completeness = meta.get("completeness")
+        if isinstance(completeness, dict) and isinstance(
+            completeness.get("complete"), bool
+        ):
+            restore_complete = completeness["complete"]
+            omitted_surfaces = completeness.get("omitted_surfaces", [])
+            partial_surfaces = completeness.get("partial_surfaces", [])
+            if not isinstance(omitted_surfaces, list):
+                omitted_surfaces = []
+            if not isinstance(partial_surfaces, list):
+                partial_surfaces = []
+        else:
+            restore_complete = None
+            omitted_surfaces = []
+            partial_surfaces = []
+        stats = {
+            "restore_complete": restore_complete,
+            "omitted_surfaces": omitted_surfaces,
+            "partial_surfaces": partial_surfaces,
+            "beam": {},
+            "legacy": {},
+            "triples": {},
+            "annotations": {},
+            "canonical": {},
+            "sync_events": {},
+        }
+        beam_stats = self.beam.import_from_dict(data, force=force)
+        stats["beam"] = beam_stats
+        l_stats = {"inserted": 0, "skipped": 0, "overwritten": 0}
+        cursor = self.conn.cursor()
+        for item in data.get("legacy_memories", []):
+            mid = item.get("id")
+            cursor.execute("SELECT 1 FROM memories WHERE id = ?", (mid,))
+            exists = cursor.fetchone() is not None
+            if exists and (not force):
+                l_stats["skipped"] += 1
+                continue
+            if exists and force:
+                cursor.execute("DELETE FROM memories WHERE id = ?", (mid,))
+                l_stats["overwritten"] += 1
+            else:
+                l_stats["inserted"] += 1
+            cursor.execute(
+                "\n                INSERT INTO memories (id, content, source, timestamp, session_id,\n                                      importance, metadata_json, created_at)\n                VALUES (?, ?, ?, ?, ?, ?, ?, ?)\n            ",
+                (
+                    mid,
+                    item.get("content"),
+                    item.get("source"),
+                    item.get("timestamp"),
+                    item.get("session_id", "default"),
+                    item.get("importance", 0.5),
+                    item.get("metadata_json", "{}"),
+                    item.get("created_at"),
+                ),
+            )
+        self.conn.commit()
+        for item in data.get("legacy_embeddings", []):
+            mid = item.get("memory_id")
+            cursor.execute(
+                "SELECT 1 FROM memory_embeddings WHERE memory_id = ?", (mid,)
+            )
+            exists = cursor.fetchone() is not None
+            if exists and (not force):
+                continue
+            if exists and force:
+                cursor.execute(
+                    "DELETE FROM memory_embeddings WHERE memory_id = ?", (mid,)
+                )
+            cursor.execute(
+                "\n                INSERT INTO memory_embeddings (memory_id, embedding_json, model, created_at)\n                VALUES (?, ?, ?, ?)\n            ",
+                (
+                    mid,
+                    item.get("embedding_json"),
+                    item.get("model", "legacy"),
+                    item.get("created_at"),
+                ),
+            )
+        self.conn.commit()
+        stats["legacy"] = l_stats
+        triples = TripleStore(db_path=self.db_path)
+        if _owned_store_connections is not None:
+            _owned_store_connections.append(triples.conn)
+        t_stats = triples.import_all(data.get("triples", []), force=force)
+        stats["triples"] = t_stats
+        annotations = AnnotationStore(db_path=self.db_path)
+        if _owned_store_connections is not None:
+            _owned_store_connections.append(annotations.conn)
+        a_stats = annotations.import_all(data.get("annotations", []), force=force)
+        stats["annotations"] = a_stats
+        canonical = CanonicalStore(db_path=self.db_path)
+        if _owned_store_connections is not None:
+            _owned_store_connections.append(canonical.conn)
+        c_stats = canonical.import_all(data.get("canonical_facts", []), force=force)
+        stats["canonical"] = c_stats
+        sync_raw = data.get("sync_events")
+        if sync_raw:
+            se_stats = {"inserted": 0, "skipped": 0, "overwritten": 0}
+            cursor.execute(
+                "SELECT event_hash FROM memory_events WHERE event_hash IS NOT NULL"
+            )
+            known_hashes = {row[0] for row in cursor.fetchall()}
+            for item in sync_raw:
+                event_hash = item.get("event_hash")
+                event_id = item.get("event_id")
+                if event_hash and event_hash in known_hashes:
+                    se_stats["skipped"] += 1
+                    continue
+                cursor.execute(
+                    "SELECT 1 FROM memory_events WHERE event_id = ?", (event_id,)
+                )
+                exists = cursor.fetchone() is not None
+                if exists:
+                    if force:
+                        cursor.execute(
+                            "DELETE FROM memory_events WHERE event_id = ?", (event_id,)
+                        )
+                        se_stats["overwritten"] += 1
+                    else:
+                        se_stats["skipped"] += 1
+                        continue
+                se_stats["inserted"] += 1
+                cursor.execute(
+                    "INSERT OR IGNORE INTO memory_events (\n                        event_id, memory_id, operation, timestamp, device_id,\n                        payload, parent_event_ids, importance, expiry,\n                        event_hash, synced_at\n                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        event_id,
+                        item.get("memory_id", ""),
+                        item.get("operation", ""),
+                        item.get("timestamp", ""),
+                        item.get("device_id", ""),
+                        item.get("payload"),
+                        item.get("parent_event_ids", "[]"),
+                        item.get("importance", 0.5),
+                        item.get("expiry"),
+                        event_hash,
+                        item.get("synced_at"),
+                    ),
+                )
+                if event_hash:
+                    known_hashes.add(event_hash)
+            self.conn.commit()
+            stats["sync_events"] = se_stats
+        return stats
+
+
+_default_instance = None
+_default_bank = "default"
+
+
+def _get_default(bank: str = None):
+    """Get or create the default Mnemosyne instance. Supports bank switching."""
+    global _default_instance, _default_bank
+    target_bank = bank or _default_bank or "default"
+    if _default_instance is None or _default_instance.bank != target_bank:
+        _default_bank = target_bank
+        _default_instance = Mnemosyne(bank=target_bank)
+    return _default_instance
+
+
+def set_bank(bank: str):
+    """
+    Switch the global default memory bank.
+    All subsequent module-level calls (remember, recall, etc.) will use this bank.
+    """
+    global _default_bank, _default_instance
+    _default_bank = bank
+    _default_instance = None
+
+
+def get_bank() -> str:
+    """Get the current default bank name."""
+    return _default_bank or "default"
+
+
+def remember(
+    content: str,
+    source: str = "conversation",
+    importance: float = 0.5,
+    metadata: Dict = None,
+    scope: str = "session",
+    valid_until: str = None,
+    extract_entities: bool = False,
+    extract: bool = False,
+    bank: str = None,
+    trust_tier: str = None,
+    veracity: str = "unknown",
+) -> str:
+    """Store a memory using the global instance"""
+    return _get_default(bank).remember(
+        content,
+        source,
+        importance,
+        metadata,
+        scope=scope,
+        valid_until=valid_until,
+        extract_entities=extract_entities,
+        extract=extract,
+        trust_tier=trust_tier,
+        veracity=veracity,
+    )
+
+
+def recall(
+    query: str,
+    top_k: int = 5,
+    *,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    source: Optional[str] = None,
+    topic: Optional[str] = None,
+    temporal_weight: float = 0.0,
+    query_time: Optional[Any] = None,
+    temporal_halflife: Optional[float] = None,
+    vec_weight: float = None,
+    fts_weight: float = None,
+    importance_weight: float = None,
+    explain: bool = False,
+    bank: str = None,
+    evidence_questions: Optional[List[str]] = None,
+) -> List[Dict]:
+    "Recall memories through Jev. Legacy scoring weights are accepted for API compatibility."
+    return _get_default(bank).recall(
+        query,
+        top_k,
+        from_date=from_date,
+        to_date=to_date,
+        source=source,
+        topic=topic,
+        temporal_weight=temporal_weight,
+        query_time=query_time,
+        temporal_halflife=temporal_halflife,
+        vec_weight=vec_weight,
+        fts_weight=fts_weight,
+        importance_weight=importance_weight,
+        explain=explain,
+        **{"evidence_questions": evidence_questions}
+        if evidence_questions is not None
+        else {},
+    )
+
+
+def get_context(limit: int = 10, bank: str = None) -> List[Dict]:
+    """Get session context using the global instance"""
+    return _get_default(bank).get_context(limit)
+
+
+def get_stats(bank: str = None) -> Dict:
+    """Get stats using the global instance"""
+    return _get_default(bank).get_stats()
+
+
+def forget(memory_id: str, bank: str = None) -> bool:
+    """Delete memory using the global instance"""
+    return _get_default(bank).forget(memory_id)
+
+
+def get(memory_id: str, bank: str = None) -> Optional[Dict]:
+    """Retrieve a single memory by its primary key using the global instance.
+    Pure read, no side effects.
+    Returns None if not found."""
+    return _get_default(bank).get(memory_id)
+
+
+def update(
+    memory_id: str, content: str = None, importance: float = None, bank: str = None
+) -> bool:
+    """Update memory using the global instance"""
+    return _get_default(bank).update(memory_id, content, importance)
+
+
+def sleep(dry_run: bool = False, force: bool = False, bank: str = None) -> Dict:
+    """Run consolidation sleep cycle for the global instance's current session"""
+    return _get_default(bank).sleep(dry_run=dry_run, force=force)
+
+
+def sleep_all_sessions(
+    dry_run: bool = False, force: bool = False, bank: str = None
+) -> Dict:
+    """Run consolidation sleep cycle across all sessions using the global instance"""
+    return _get_default(bank).sleep_all_sessions(dry_run=dry_run, force=force)
+
+
+def reclaim_orphans(
+    dry_run: bool = False,
+    stale_after_seconds: int = 3600,
+    limit: int = 1000,
+    bank: str = None,
+) -> Dict:
+    """Clear stale sleep claims that have no episodic summary using the global instance."""
+    return _get_default(bank).reclaim_orphans(
+        dry_run=dry_run, stale_after_seconds=stale_after_seconds, limit=limit
+    )
+
+
+def scratchpad_write(content: str, bank: str = None) -> str:
+    """Write to scratchpad using the global instance"""
+    return _get_default(bank).scratchpad_write(content)
+
+
+def scratchpad_read(bank: str = None) -> List[Dict]:
+    """Read scratchpad using the global instance"""
+    return _get_default(bank).scratchpad_read()
+
+
+def scratchpad_clear():
+    """Clear scratchpad using the global instance"""
+    return _get_default().scratchpad_clear()

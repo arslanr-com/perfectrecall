@@ -1,0 +1,9 @@
+include LICENSE NOTICE README.md SECURITY.md CONTRIBUTING.md CITATION.cff THIRD_PARTY_NOTICES.md CHANGELOG.md
+recursive-include docs *.md
+recursive-include LICENSES *.txt
+recursive-include scripts *.py
+recursive-include tests *.py
+recursive-include benchmarks *.md *.py *.json *.patch *.txt
+prune benchmarks/work
+prune benchmarks/runs
+prune benchmarks/downloads

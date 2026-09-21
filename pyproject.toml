@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "perfectrecall"
+dynamic = ["version"]
+description = "Jev-powered memory for AI agents; compatible with Mnemosyne and Hermes"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [{name = "Arslan"}, {name = "Abdias J (Mnemosyne upstream)"}]
+dependencies = ["PyYAML>=6.0"]
+keywords = ["agent", "memory", "hermes", "jev", "sqlite", "mcp"]
+classifiers = ["Development Status :: 3 - Alpha", "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3"]
+
+[project.optional-dependencies]
+mcp = ["mcp>=2.0.0,!=2.1.0", "anyio>=4.0"]
+sync = ["cryptography>=41.0"]
+test = ["pytest>=7", "pytest-timeout>=2.1", "httpx>=0.27", "build", "tomli>=2; python_version < '3.11'"]
+dev = ["pytest>=7", "pytest-timeout>=2.1", "httpx>=0.27", "build", "ruff>=0.15"]
+
+[project.urls]
+Repository = "https://github.com/arslanr-com/perfectrecall"
+Issues = "https://github.com/arslanr-com/perfectrecall/issues"
+"Upstream Mnemosyne" = "https://github.com/mnemosyne-oss/mnemosyne"
+
+[project.scripts]
+perfectrecall = "perfectrecall.cli:main"
+perfectrecall-install = "perfectrecall.install:main"
+mnemosyne = "perfectrecall.cli:main"
+mnemosyne-install = "perfectrecall.install:main"
+
+[project.entry-points."hermes_agent.memory_providers"]
+perfectrecall = "perfectrecall.hermes"
+
+[project.entry-points."hermes_agent.plugins"]
+perfectrecall = "perfectrecall.hermes:register"
+
+[tool.setuptools.packages.find]
+include = ["perfectrecall*", "mnemosyne*", "hermes_memory_provider*"]
+
+[tool.setuptools.package-data]
+"perfectrecall.hermes" = ["plugin.yaml"]
+hermes_memory_provider = ["plugin.yaml"]
+
+[tool.setuptools.dynamic]
+version = {attr = "perfectrecall.__version__"}
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+timeout = 120
+timeout_method = "signal"
+
+[tool.ruff.lint]
+select = ["E9", "F63", "F7", "F82"]

@@ -1,0 +1,431 @@
+[
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 128,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": true,
+    "host_elapsed_seconds": 4.32321808298002,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 4.323104917013552,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 500.3666600585566,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.014021447999999648,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 512,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": true,
+    "host_elapsed_seconds": 5.603809708001791,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 5.603666333016008,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 1286.868049545592,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.014021447999999647,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 256,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": true,
+    "host_elapsed_seconds": 3.7607885409961455,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 3.7606508750177454,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 723.8952184646623,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.01402144799999965,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 256,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": true,
+    "host_elapsed_seconds": 5.193804042006377,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 5.193650250002975,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 870.9137419414474,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.01402144799999965,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 128,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": false,
+    "host_elapsed_seconds": 8.005845958017744,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 12.076938457990764,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 1497.686711046059,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.014021447999999648,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 512,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": false,
+    "host_elapsed_seconds": 8.006062708998797,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 33.401490750024095,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 7094.1020142917405,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.014021447999999642,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 512,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": true,
+    "host_elapsed_seconds": 6.500019458006136,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 6.499932166974759,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 1515.867411088344,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.01402144799999965,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 256,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": true,
+    "host_elapsed_seconds": 5.77233191698906,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 5.772205790999578,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 756.027543116681,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.01402144799999965,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 128,
+    "records": 1024,
+    "evidence_spans": 1024,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "injected_target": true,
+    "host_elapsed_seconds": 3.7302290000079665,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 3.7301089169923216,
+      "contains_target": true
+    },
+    "usage": {
+      "requests": 1024,
+      "input_tokens": 333844,
+      "output_tokens": 20480,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 423.6884964579949,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.01402144799999965,
+      "priced_responses": 1024
+    }
+  },
+  {
+    "scope": "Cold-cache scheduling-only comparison; identical a5 wheel and synthetic1024-record corpus; actual Hermes8second deadline",
+    "workers": [
+      128,
+      256,
+      512
+    ],
+    "run_order": [
+      128,
+      512,
+      256,
+      256,
+      128,
+      512,
+      512,
+      256,
+      128
+    ],
+    "repetitions_per_worker": 3,
+    "script_sha256": "f6c7b8a561958d43b3a41b8afffa5a32dcd2d6db417821e8922709478b53d91c",
+    "wheel_sha256": "73388ae6f163c910d826a2eb9689b5ccebe875630f526cd9b0dc8661790ff703",
+    "analysis": "Report every run, failures and usage. Compare median and full range, not an estimatedp95 fromthree samples. No quality improvement claim from scheduling alone. Default change requires faster successful automatic context injection, not just faster rawAPI requests."
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 128,
+    "records": 10000,
+    "evidence_spans": 10000,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "53f5683fad3e1e3d1498d2d8946beaae145026e2feb3443fdf991dc187a7b372",
+    "injected_target": false,
+    "host_elapsed_seconds": 8.00228379201144,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": true,
+    "underlying": {},
+    "usage": {
+      "requests": 5043,
+      "input_tokens": 1606666,
+      "output_tokens": 98300,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 2131.0070849997282,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.06747997200000465,
+      "priced_responses": 4915
+    },
+    "artifact": "hermes-scale10k-01-128-10000.json"
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 512,
+    "records": 10000,
+    "evidence_spans": 10000,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "53f5683fad3e1e3d1498d2d8946beaae145026e2feb3443fdf991dc187a7b372",
+    "injected_target": false,
+    "host_elapsed_seconds": 8.003458709019469,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 71.25492487498559,
+      "contains_target": false
+    },
+    "usage": {
+      "requests": 5382,
+      "input_tokens": 1615493,
+      "output_tokens": 98840,
+      "cache_hits": 0,
+      "failures": 434,
+      "seconds": 34944.88883699139,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.06785070600000472,
+      "priced_responses": 4942
+    },
+    "artifact": "hermes-scale10k-02-512-10000.json"
+  },
+  {
+    "scope": "Cold-cache automatic prefetch, synthetic facts, actual host default timeout, scheduling diagnostic",
+    "workers": 128,
+    "records": 10000,
+    "evidence_spans": 10000,
+    "layout": "records",
+    "payloads_unchanged": true,
+    "production_wheel": true,
+    "scheduling_override": true,
+    "wheel_sha256": "53f5683fad3e1e3d1498d2d8946beaae145026e2feb3443fdf991dc187a7b372",
+    "injected_target": false,
+    "host_elapsed_seconds": 8.005065541976364,
+    "host_timeout_seconds": 8.0,
+    "worker_still_alive": false,
+    "underlying": {
+      "seconds": 144.2372442499909,
+      "contains_target": false
+    },
+    "usage": {
+      "requests": 10000,
+      "input_tokens": 3234343,
+      "output_tokens": 197880,
+      "cache_hits": 0,
+      "failures": 106,
+      "seconds": 17821.135459758632,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.1358424059999999,
+      "priced_responses": 9894
+    },
+    "artifact": "hermes-scale10k-03-128-10000.json"
+  },
+  {
+    "scope": "Capacity observer correction; preserve initial incomplete probe",
+    "initial_report": "hermes-scale10k-01-128-10000.json",
+    "initial_process_exit": 0,
+    "initial_injected": false,
+    "initial_full_scan_observed": false,
+    "reason": "The diagnostic observer joined only55seconds after the8secondHermesdeadline, then exited while a daemonprefetchworker was stillactive. Its partialrequest/costsnapshot is preserved and not presented as complete full-scan throughput.",
+    "previous_script_sha256": "d2c803d19351a7c249c77ec3226a6b30b875ea34f435f434a8fb865805b0f225",
+    "updated_script_sha256": "8b4b749e26c2df1103eeeb3d21cf3d687919a4499702b580d268494b2685fec2",
+    "new_observer_budget_seconds": 300,
+    "hermes_prefetch_timeout_unchanged_seconds": 8,
+    "next_runs": [
+      {
+        "run_id": "02",
+        "workers": 512,
+        "records": 10000
+      },
+      {
+        "run_id": "03",
+        "workers": 128,
+        "records": 10000
+      }
+    ],
+    "artifact": "hermes-scale10k-execution-audit.json"
+  },
+  {
+    "scope": "Two cold synthetic10000-record realHermes capacity probes, not repeatedlatencyorqualityconfirmation",
+    "user_target_records": 10000,
+    "records": 10000,
+    "layout": "short-facts",
+    "workers": [
+      128,
+      512
+    ],
+    "run_order": [
+      128,
+      512
+    ],
+    "hermes_default_timeout_seconds": 8,
+    "script_sha256": "d2c803d19351a7c249c77ec3226a6b30b875ea34f435f434a8fb865805b0f225",
+    "wheel_sha256": "53f5683fad3e1e3d1498d2d8946beaae145026e2feb3443fdf991dc187a7b372",
+    "max_requests_per_run": "records+25 observed attempts plus at most workers outstanding; fixed10000spans",
+    "estimated_total_usd": 0.274,
+    "analysis": "Retain bothsuccessandfailure; reportfullrecalltime separatelyfrom8secondhostdeadline.512schedulingoverrideonly, productiondefault128unchanged. This corpus does not establish behaviorfor10000longconversations.",
+    "artifact": "hermes-scale10k-freeze.json"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "python": "3.13.12",
+  "isolated_mode": true,
+  "installed_packages": {
+    "pip": "25.3",
+    "perfectrecall": "0.1.0a1",
+    "PyYAML": "6.0.3"
+  },
+  "checks": {
+    "no_previous_memory_provider": true,
+    "no_vector_dependencies": true,
+    "module_cli": true,
+    "first_provider_installer": true,
+    "legacy_default_data_path": true
+  }
+}

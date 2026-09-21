@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "live_api": true,
+  "manual_memory_tool_calls": 0,
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "wheel_sha256": "ca3ed594906dd33d8e76dac1327e6642dfb9f964e4a4ec742b4504fa8eb070f1",
+  "checks": {
+    "empty_profile": true,
+    "entrypoint_discovered": true,
+    "actual_host_abc": true,
+    "automatic_capture": true,
+    "assistant_excluded": true,
+    "reopened_prefetch": true
+  },
+  "usage": {
+    "requests": 8,
+    "input_tokens": 3131,
+    "output_tokens": 331,
+    "cache_hits": 0,
+    "failures": 0,
+    "seconds": 3.4705997920245863,
+    "resolved_model": "typesafe/jev-1.13-20260917",
+    "cost_usd": 0.000131502,
+    "priced_responses": 8
+  }
+}

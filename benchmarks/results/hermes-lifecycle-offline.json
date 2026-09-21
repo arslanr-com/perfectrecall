@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "live_api": false,
+  "manual_memory_tool_calls": 0,
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "wheel_sha256": "ca3ed594906dd33d8e76dac1327e6642dfb9f964e4a4ec742b4504fa8eb070f1",
+  "checks": {
+    "empty_profile": true,
+    "entrypoint_discovered": true,
+    "actual_host_abc": true,
+    "automatic_capture": true,
+    "assistant_excluded": true,
+    "reopened_prefetch": true
+  },
+  "usage": {
+    "requests": 8,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_hits": 0,
+    "failures": 0,
+    "seconds": 0.00011958397226408124,
+    "resolved_model": "test-double",
+    "cost_usd": 0.0,
+    "priced_responses": 0
+  }
+}

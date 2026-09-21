@@ -1,0 +1,7 @@
+PerfectRecall is an independent hard fork of Mnemosyne.
+Upstream: https://github.com/mnemosyne-oss/mnemosyne
+Baseline commit: 199d4bc6662bd51c18275331ddeb51ac07387acf
+Original copyright and MIT permission notice are retained in LICENSE.
+PerfectRecall changes: Arslan, 2026.
+Names of upstream projects and service providers identify compatibility and provenance;
+no endorsement or affiliation is implied.

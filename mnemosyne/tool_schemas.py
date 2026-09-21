@@ -1,0 +1,961 @@
+"""
+Single source of truth for all Mnemosyne MCP tool schemas (33 tools).
+
+Import from this module rather than defining schemas inline:
+    from mnemosyne.tool_schemas import ALL_TOOL_SCHEMAS
+
+Every schema dict uses the key "parameters" (JSON Schema style).
+The MCP server layer renames it to "input_schema" at registration time
+(matching the ``mcp`` SDK 2.x ``Tool.input_schema`` model field — was
+``inputSchema`` on the wire in SDK 1.x).
+"""
+
+from typing import Dict, Any, List
+
+REMEMBER_SCHEMA = {
+    "name": "mnemosyne_remember",
+    "description": (
+        "Store a durable memory in Mnemosyne. Use for ANY fact, preference, "
+        "identity, insight, or context that should persist across sessions. Higher importance "
+        "(0.0-1.0) surfaces the memory more often. Use scope='global' for user-level "
+        "facts; scope='session' for conversation-specific context. Use valid_until "
+        "(ISO date YYYY-MM-DD) for time-bound facts. Use extract_entities=True to "
+        "extract named entities for fuzzy recall (e.g. 'Abdias' and 'Abdias J.' will match). "
+        "Use extract=True to also pull subject-predicate-object fact triples via LLM "
+        "for fact-aware recall. Use veracity to tag confidence: 'stated' for direct "
+        "user assertions, 'tool' for deterministic tool output, 'inferred' for derived "
+        "guesses; 'unknown' (default) gets no recall boost."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "content": {"type": "string", "description": "The memory content to store."},
+            "importance": {"type": "number", "description": "Importance 0.0-1.0. Default 0.5.", "default": 0.5},
+            "source": {"type": "string", "description": "Source tag: preference, fact, insight, identity, task, etc.", "default": "user"},
+            "scope": {"type": "string", "description": "'session' (default) or 'global'.", "default": "session"},
+            "valid_until": {"type": "string", "description": "Optional expiry date YYYY-MM-DD.", "default": ""},
+            "extract_entities": {"type": "boolean", "description": "Extract named entities for fuzzy recall. Default False.", "default": False},
+            "extract": {"type": "boolean", "description": "Extract subject-predicate-object fact triples via LLM for fact-aware recall. Default False.", "default": False},
+            "metadata": {"type": "object", "description": "Optional dict of additional fields (source_doc, tags, page, etc.). Default empty.", "default": {}},
+            "veracity": {"type": "string", "description": "Confidence label: 'stated' | 'inferred' | 'tool' | 'imported' | 'unknown'. Default 'unknown'.", "default": "unknown"},
+        },
+        "required": ["content"],
+    },
+}
+
+RECALL_SCHEMA = {
+    "name": "mnemosyne_recall",
+    "description": "Search PerfectRecall memory. Jev evaluates every eligible memory and returns original evidence records. Supply query and 1-3 evidence_questions. Each criterion must be a SHORT, self-contained yes/no question about ONE observable fact or topic; aim for 20 words or fewer. Use ordinary concrete words. Do not pack lists of attributes, eligibility conditions, or the whole answer task into one criterion. A match to any criterion admits the record. Retrieve partial evidence, then reason over the returned context yourself. Example: 'Do I go to the gym more often now?' -> ['Does the user mention going to the gym?']. Retrieve the individual observations first; compare their values and dates afterwards. For personalized advice, first retrieve the user's experiences with the topic, things they use, and stated likes or dislikes. Do not require the passage to explain how those facts solve the current problem. Use remembered constraints and resources in your answer. Distinguish the user's own statements from assistant suggestions and hypothetical examples while reading the returned context. For a linked fact, retrieve the known event or relationship before searching for the entity actually found. Do not assume an unknown answer, specialized meaning, or exact date in a criterion. For temporal questions, find the reference event before calculating a cutoff; use the question date only when the question refers to now. If a search is empty or yields only tangential evidence, use the remaining search budget to try a simpler topic criterion, dropping assumptions and optional qualifiers. An empty search alone does not prove the memory lacks the topic. Cite returned evidence, preserve uncertainty where a required fact is missing, and do not invent facts. Always supply evidence_questions for PerfectRecall quality mode; omitted criteria use generic query relevance.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "Natural language query."},
+            "evidence_questions": {'type': 'array', 'minItems': 1, 'maxItems': 3, 'items': {'type': 'string', 'minLength': 1, 'maxLength': 600}, 'description': "Caller-authored yes/no questions describing evidence to retrieve. Follow the tool's formulation instructions."},
+            "limit": {"type": "integer", "description": "Max results. Default 5.", "default": 5},
+            "temporal_weight": {
+                "type": "number",
+                "description": "How much to boost recent memories (0.0 = ignore time, 0.2 = mild recency bias, 0.5 = strong recency bias). Default 0.0.",
+                "default": 0.0,
+            },
+            "query_time": {
+                "type": "string",
+                "description": "ISO timestamp to treat as 'now' for temporal scoring. Omit to use the current time.",
+            },
+            "temporal_halflife": {
+                "type": "number",
+                "description": "Hours until temporal boost decays by half. Default 24. Lower = faster decay.",
+                "default": 24,
+            },
+            "vec_weight": {
+                "type": ["number", "null"],
+                "description": "Vector similarity weight in hybrid scoring. Omit (or pass null) to resolve config.yaml, then MNEMOSYNE_VEC_WEIGHT, then built-in default 0.5.",
+            },
+            "fts_weight": {
+                "type": ["number", "null"],
+                "description": "Full-text search weight in hybrid scoring. Omit (or pass null) to resolve config.yaml, then MNEMOSYNE_FTS_WEIGHT, then built-in default 0.3.",
+            },
+            "importance_weight": {
+                "type": ["number", "null"],
+                "description": "Importance score weight in hybrid scoring. Omit (or pass null) to resolve config.yaml, then MNEMOSYNE_IMPORTANCE_WEIGHT, then built-in default 0.2.",
+            },
+            "explain": {
+                "type": "boolean",
+                "description": "If true, return a structured per-query recall explain trace. Default false.",
+                "default": False,
+            },
+        },
+        "required": ["query"],
+    },
+}
+
+SHARED_REMEMBER_SCHEMA = {
+    "name": "mnemosyne_shared_remember",
+    "description": (
+        "Store compact cross-agent surface memory in a dedicated shared Mnemosyne DB. "
+        "Use only for stable user/system/workflow metadata or general preferences. "
+        "Normal mnemosyne_remember writes stay private."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "content": {"type": "string", "description": "Surface memory content to store."},
+            "kind": {"type": "string", "description": "meta | preference | correction | identity", "default": "meta"},
+            "importance": {"type": "number", "description": "Importance 0.0-1.0. Default 0.8.", "default": 0.8},
+            "veracity": {"type": "string", "description": "stated | inferred | tool | imported | unknown", "default": "unknown"},
+            "metadata": {"type": "object", "description": "Optional metadata object.", "default": {}},
+        },
+        "required": ["content"],
+    },
+}
+
+SHARED_RECALL_SCHEMA = {
+    "name": "mnemosyne_shared_recall",
+    "description": "Search only shared surface memory. Search PerfectRecall memory. Jev evaluates every eligible memory and returns original evidence records. Supply query and 1-3 evidence_questions. Each criterion must be a SHORT, self-contained yes/no question about ONE observable fact or topic; aim for 20 words or fewer. Use ordinary concrete words. Do not pack lists of attributes, eligibility conditions, or the whole answer task into one criterion. A match to any criterion admits the record. Retrieve partial evidence, then reason over the returned context yourself. Example: 'Do I go to the gym more often now?' -> ['Does the user mention going to the gym?']. Retrieve the individual observations first; compare their values and dates afterwards. For personalized advice, first retrieve the user's experiences with the topic, things they use, and stated likes or dislikes. Do not require the passage to explain how those facts solve the current problem. Use remembered constraints and resources in your answer. Distinguish the user's own statements from assistant suggestions and hypothetical examples while reading the returned context. For a linked fact, retrieve the known event or relationship before searching for the entity actually found. Do not assume an unknown answer, specialized meaning, or exact date in a criterion. For temporal questions, find the reference event before calculating a cutoff; use the question date only when the question refers to now. If a search is empty or yields only tangential evidence, use the remaining search budget to try a simpler topic criterion, dropping assumptions and optional qualifiers. An empty search alone does not prove the memory lacks the topic. Cite returned evidence, preserve uncertainty where a required fact is missing, and do not invent facts. Always supply evidence_questions for PerfectRecall quality mode; omitted criteria use generic query relevance.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {"type": "string"},
+            "evidence_questions": {'type': 'array', 'minItems': 1, 'maxItems': 3, 'items': {'type': 'string', 'minLength': 1, 'maxLength': 600}, 'description': "Caller-authored yes/no questions describing evidence to retrieve. Follow the tool's formulation instructions."},
+            "limit": {"type": "integer", "default": 5},
+        },
+        "required": ["query"],
+    },
+}
+
+SHARED_FORGET_SCHEMA = {
+    "name": "mnemosyne_shared_forget",
+    "description": "Delete one working shared-surface memory by exact ID.",
+    "parameters": {
+        "type": "object",
+        "properties": {"memory_id": {"type": "string"}},
+        "required": ["memory_id"],
+    },
+}
+
+SHARED_STATS_SCHEMA = {
+    "name": "mnemosyne_shared_stats",
+    "description": "Return shared surface DB path and counts.",
+    "parameters": {"type": "object", "properties": {}},
+}
+
+SLEEP_SCHEMA = {
+    "name": "mnemosyne_sleep",
+    "description": (
+        "Run the Mnemosyne consolidation cycle. Compresses old working memories "
+        "into episodic summaries. Call after long sessions or when memory feels stale. "
+        "Set all_sessions=true to consolidate eligible old working memories across inactive sessions."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "all_sessions": {
+                "type": "boolean",
+                "description": "If true, consolidate eligible old working memories across all sessions instead of only the current session.",
+                "default": False,
+            },
+            "dry_run": {
+                "type": "boolean",
+                "description": "If true, report what would be consolidated without writing changes.",
+                "default": False,
+            },
+            "force": {
+                "type": "boolean",
+                "description": "If true, skip the age threshold and consolidate all non-consolidated working memories immediately.",
+                "default": False,
+            },
+        },
+    },
+}
+
+STATS_SCHEMA = {
+    "name": "mnemosyne_stats",
+    "description": "Return Mnemosyne memory statistics: working count, episodic count, BEAM tiers.",
+    "parameters": {
+        "type": "object",
+        "properties": {}
+    }
+}
+
+INVALIDATE_SCHEMA = {
+    "name": "mnemosyne_invalidate",
+    "description": (
+        "Mark a memory as expired or superseded. Provide memory_id from recall results. "
+        "Optionally provide a replacement_id that must resolve to a working-memory or episodic-memory "
+        "record that is accessible in the current session or global scope to chain old to new. "
+        "An unknown or out-of-scope target or replacement returns status: memory_not_found."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "memory_id": {"type": "string", "description": "ID of memory to invalidate."},
+            "replacement_id": {"type": "string", "description": "Optional new memory that replaces this one.", "default": ""},
+        },
+        "required": ["memory_id"],
+    },
+}
+
+VALIDATE_SCHEMA = {
+    "name": "mnemosyne_validate",
+    "description": (
+        "Attest, update, or invalidate a memory the caller did not necessarily author. "
+        "Supports collaborative ownership: any agent can validate any memory in either "
+        "the private bank or the shared surface. The original author is preserved; "
+        "validator + validated_at are updated to record the most recent attester. "
+        "A 3-entry ring buffer keeps lightweight history. "
+        "Actions: 'attest' (confirm correctness), 'update' (replace content), "
+        "'invalidate' (mark superseded), 'delete' (remove)."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "memory_id": {"type": "string", "description": "ID of memory to validate."},
+            "action": {
+                "type": "string",
+                "enum": ["attest", "update", "invalidate", "delete"],
+                "description": "What kind of validation to record.",
+            },
+            "validator": {
+                "type": "string",
+                "description": "Agent identifier performing the validation. Defaults to the caller's agent_identity if not set.",
+                "default": "",
+            },
+            "new_content": {
+                "type": "string",
+                "description": "New content (only used with action='update').",
+                "default": "",
+            },
+            "note": {
+                "type": "string",
+                "description": "Optional reason or evidence for this validation.",
+                "default": "",
+            },
+            "store": {
+                "type": "string",
+                "enum": ["private", "surface"],
+                "description": "Which store holds the memory: 'private' (the caller's own memory, tenant bank selectable via 'bank') or 'surface' (the shared cross-agent surface, one global store). Default 'private'.",
+                "default": "private",
+            },
+            "bank": {
+                "type": "string",
+                "description": (
+                    "Memory bank to operate on when store is 'private'. Banks are "
+                    "separate stores: memories written to one are not visible to "
+                    "another, which is how a single MCP server serves more than one "
+                    "tenant. Defaults to the server's MNEMOSYNE_MCP_BANK, or 'default'. "
+                    "Deprecated: the values 'private' and 'surface' are still accepted "
+                    "here as an alias for 'store' and will stop being accepted in 5.0."
+                ),
+            },
+        },
+        "required": ["memory_id", "action"],
+    },
+}
+
+GET_SCHEMA = {
+    "name": "mnemosyne_get",
+    "description": (
+        "Retrieve a single memory by its primary key. Pure read, no side effects. "
+        "No semantic search. Returns the exact memory with the given ID or None. "
+        "Use this when you already know the memory ID from a previous recall response."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "memory_id": {"type": "string", "description": "The memory ID to retrieve."},
+        },
+        "required": ["memory_id"],
+    },
+}
+
+TRIPLE_ADD_SCHEMA = {
+    "name": "mnemosyne_triple_add",
+    "description": (
+        "Add a temporal fact triple (subject, predicate, object) to the knowledge graph. "
+        "Example: ('user', 'prefers', 'neovim'). Use for structured relationships. "
+        "By default a new triple supersedes any prior fact with the same subject+predicate; "
+        "set supersede=false for multi-valued facts that should coexist "
+        "(e.g. ('user','speaks','English') and ('user','speaks','Spanish'))."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "subject": {"type": "string"},
+            "predicate": {"type": "string"},
+            "object": {"type": "string"},
+            "valid_from": {"type": "string", "description": "ISO date YYYY-MM-DD", "default": ""},
+            "valid_until": {"type": "string", "description": "Optional ISO expiry date YYYY-MM-DD.", "default": ""},
+            "source": {"type": "string", "description": "Provenance label.", "default": ""},
+            "confidence": {"type": "number", "description": "0.0-1.0 (default 1.0).", "default": 1.0},
+            "supersede": {"type": "boolean", "description": "If false, do not close prior same subject+predicate triples (multi-valued).", "default": True},
+        },
+        "required": ["subject", "predicate", "object"],
+    },
+}
+
+TRIPLE_END_SCHEMA = {
+    "name": "mnemosyne_triple_end",
+    "description": (
+        "Expire a fact in the knowledge graph WITHOUT replacing it (e.g. a relationship "
+        "that simply ended). Closes all open triples for subject+predicate, or only the one "
+        "matching object when given. Use mnemosyne_triple_add instead when a new value replaces the old."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "subject": {"type": "string"},
+            "predicate": {"type": "string"},
+            "object": {"type": "string", "description": "Optional: end only this exact triple; omit to end all open subject+predicate triples.", "default": ""},
+            "valid_until": {"type": "string", "description": "ISO date YYYY-MM-DD the fact ended (default: today).", "default": ""},
+        },
+        "required": ["subject", "predicate"],
+    },
+}
+
+TRIPLE_QUERY_SCHEMA = {
+    "name": "mnemosyne_triple_query",
+    "description": (
+        "Query the temporal knowledge graph for facts matching subject/predicate/object patterns. "
+        "Subject match is case-insensitive. Pass as_of to query facts valid on a past date."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "subject": {"type": "string", "default": ""},
+            "predicate": {"type": "string", "default": ""},
+            "object": {"type": "string", "default": ""},
+            "as_of": {"type": "string", "description": "ISO date YYYY-MM-DD; query facts valid as of this date (default: today).", "default": ""},
+        },
+    },
+}
+
+REMEMBER_CANONICAL_SCHEMA = {
+    "name": "mnemosyne_remember_canonical",
+    "description": (
+        "Store a CANONICAL (single-source-of-truth) self-fact for the current "
+        "profile. Each (category, name) slot holds exactly one current value: "
+        "restating the same body is a no-op, and a new body supersedes the old "
+        "one (kept as history). Use for stable identity cards — name, voice, "
+        "stable preferences, relationships — that must not contradict themselves "
+        "over time. Scoped privately to this profile. For relational facts use "
+        "mnemosyne_triple_add; for episodic recall use mnemosyne_remember."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "category": {"type": "string", "description": "Slot group, e.g. 'identity', 'voice', 'preference'"},
+            "name": {"type": "string", "description": "Slot key within the category, e.g. 'name', 'pronouns'"},
+            "body": {"type": "string", "description": "The authoritative free-text value for this slot"},
+            "source": {"type": "string", "description": "Optional provenance label", "default": ""},
+            "confidence": {"type": "number", "description": "Optional 0..1 confidence", "default": 1.0},
+        },
+        "required": ["category", "name", "body"],
+    },
+}
+
+RECALL_CANONICAL_SCHEMA = {
+    "name": "mnemosyne_recall_canonical",
+    "description": (
+        "Read CANONICAL self-facts for the current profile. With category+name: "
+        "return the single authoritative value for that slot. With category "
+        "only: list that category's slots. With query: substring-search the "
+        "profile's canonical values. With nothing: list all canonical slots. "
+        "Set include_history=true to also return superseded versions of a slot."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "category": {"type": "string", "default": ""},
+            "name": {"type": "string", "default": ""},
+            "query": {"type": "string", "description": "Substring search across the profile's canonical values", "default": ""},
+            "include_history": {"type": "boolean", "description": "Include superseded versions (requires category+name)", "default": False},
+            "limit": {"type": "integer", "description": "Max results for query/list modes", "default": 10},
+        },
+    },
+}
+
+FORGET_CANONICAL_SCHEMA = {
+    "name": "mnemosyne_forget_canonical",
+    "description": (
+        "Retire a CANONICAL self-fact slot for the resolved owner in the selected "
+        "local bank. This operation is private to that owner. Stamps valid_until "
+        "on the current row, preserving it as local SQLite history. "
+        "Returns whether a current row was retired. Nothing is deleted. "
+        "Use this to remove a canonical fact (e.g. a stale preference or identity)."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "category": {"type": "string", "description": "Slot group, e.g. 'identity', 'voice', 'preference'"},
+            "name": {"type": "string", "description": "Slot key within the category, e.g. 'name', 'pronouns'"},
+        },
+        "required": ["category", "name"],
+    },
+}
+
+SCRATCHPAD_WRITE_SCHEMA = {
+    "name": "mnemosyne_scratchpad_write",
+    "description": "Write a temporary note to the Mnemosyne scratchpad.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "content": {"type": "string", "description": "Content to write"},
+        },
+        "required": ["content"],
+    },
+}
+
+SCRATCHPAD_READ_SCHEMA = {
+    "name": "mnemosyne_scratchpad_read",
+    "description": "Read the Mnemosyne scratchpad entries.",
+    "parameters": {"type": "object", "properties": {}},
+}
+
+SCRATCHPAD_CLEAR_SCHEMA = {
+    "name": "mnemosyne_scratchpad_clear",
+    "description": "Clear all entries from the Mnemosyne scratchpad.",
+    "parameters": {"type": "object", "properties": {}},
+}
+
+EXPORT_SCHEMA = {
+    "name": "mnemosyne_export",
+    "description": "Export all Mnemosyne memories to a JSON file for backup or migration.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "output_path": {
+                "type": "string",
+                "description": "File path to write the export JSON (e.g., /tmp/mnemosyne_backup.json)",
+            },
+        },
+        "required": ["output_path"],
+    },
+}
+
+UPDATE_SCHEMA = {
+    "name": "mnemosyne_update",
+    "description": "Update the content or importance of an existing memory by ID.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "memory_id": {"type": "string", "description": "ID of the memory to update"},
+            "content": {"type": "string", "description": "New content for the memory (optional)"},
+            "importance": {"type": "number", "description": "New importance from 0.0 to 1.0 (optional)"},
+        },
+        "required": ["memory_id"],
+    },
+}
+
+FORGET_SCHEMA = {
+    "name": "mnemosyne_forget",
+    "description": "Permanently delete a memory by ID.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "memory_id": {"type": "string", "description": "ID of the memory to delete"},
+        },
+        "required": ["memory_id"],
+    },
+}
+
+BATCH_SCHEMA = {
+    "name": "mnemosyne_batch",
+    "description": (
+        "Apply multiple Mnemosyne memory mutations atomically in one tool call. "
+        "Supported v1 actions: remember, update, forget, invalidate. "
+        "All operations are validated before mutation; on failure the whole batch rolls back. "
+        "Destructive actions require exact memory IDs. Recall/search/canonical/persona/shared-surface operations are not included in v1."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "operations": {
+                "type": "array",
+                "maxItems": 50,
+                "description": "Ordered mutation operations to apply atomically.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "enum": ["remember", "update", "forget", "invalidate"]},
+                        "content": {"type": "string"},
+                        "memory_id": {"type": "string"},
+                        "importance": {"type": "number"},
+                        "source": {"type": "string"},
+                        "scope": {"type": "string"},
+                        "valid_until": {"type": "string"},
+                        "metadata": {"type": "object"},
+                        "extract_entities": {"type": "boolean"},
+                        "extract": {"type": "boolean"},
+                        "veracity": {"type": "string"},
+                        "replacement_id": {"type": "string"},
+                    },
+                    "required": ["action"],
+                },
+            },
+            "dry_run": {"type": "boolean", "default": False},
+            "bank": {"type": "string"},
+            "author_id": {"type": "string"},
+            "author_type": {"type": "string"},
+            "channel_id": {"type": "string"},
+        },
+        "required": ["operations"],
+    },
+}
+
+IMPORT_SCHEMA = {
+    "name": "mnemosyne_import",
+    "description": "Import Mnemosyne memories from a JSON file or another memory provider (Hindsight, Mem0). Idempotent by default.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "input_path": {
+                "type": "string",
+                "description": "File path to read the export JSON from (for file imports)",
+            },
+            "provider": {
+                "type": "string",
+                "description": "Provider to import from: 'hindsight', 'mem0'. Requires api_key.",
+            },
+            "api_key": {
+                "type": "string",
+                "description": "API key for the source provider (can also be set via env var)",
+            },
+            "user_id": {
+                "type": "string",
+                "description": "Filter imported memories by user ID (provider-specific)",
+            },
+            "agent_id": {
+                "type": "string",
+                "description": "Filter imported memories by agent ID (provider-specific)",
+            },
+            "base_url": {
+                "type": "string",
+                "description": "Base URL for self-hosted provider instances",
+            },
+            "dry_run": {
+                "type": "boolean",
+                "description": "If true, validate and transform but don't write any memories",
+                "default": False,
+            },
+            "channel_id": {
+                "type": "string",
+                "description": "Channel to assign imported memories to",
+            },
+            "force": {
+                "type": "boolean",
+                "description": "If true, overwrite existing records instead of skipping",
+                "default": False,
+            },
+        },
+    },
+}
+
+DIAGNOSE_SCHEMA = {
+    "name": "mnemosyne_diagnose",
+    "description": "Run PII-safe diagnostics on Mnemosyne installation. Checks credentials, dependencies, and database state. Never includes memory content or API keys.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "repair_vec_working": {
+                "type": "boolean",
+                "description": "Deprecated compatibility argument; vector maintenance is unsupported in PerfectRecall.",
+                "default": False,
+            },
+            "dry_run": {
+                "type": "boolean",
+                "description": "If true with repair_vec_working, report what would be repaired without writing.",
+                "default": False,
+            },
+        },
+    },
+}
+
+GRAPH_QUERY_SCHEMA = {
+    "name": "mnemosyne_graph_query",
+    "description": "Traverse the memory graph to find memories related to a seed memory. Uses multi-hop BFS through graph_edges with optional edge_type and min_weight filtering.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "seed_memory_id": {
+                "type": "string",
+                "description": "Memory ID to start traversal from",
+            },
+            "max_hops": {
+                "type": "integer",
+                "description": "Maximum traversal depth (default: 2)",
+                "default": 2,
+            },
+            "edge_type": {
+                "type": "string",
+                "description": "Filter by edge type (empty = all types, e.g. 'ctx', 'rel', 'syn', 'references', 'caused', 'supersedes')",
+                "default": "",
+            },
+            "min_weight": {
+                "type": "number",
+                "description": "Minimum edge weight threshold (0.0 to 1.0, default: 0.0 = no filter)",
+                "default": 0.0,
+            },
+        },
+        "required": ["seed_memory_id"],
+    },
+}
+
+GRAPH_LINK_SCHEMA = {
+    "name": "mnemosyne_graph_link",
+    "description": "Declare a semantic edge between two memories in the graph. Use this to explicitly link related memories so graph traversal finds them.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "source_id": {
+                "type": "string",
+                "description": "Source memory ID",
+            },
+            "target_id": {
+                "type": "string",
+                "description": "Target memory ID",
+            },
+            "relationship": {
+                "type": "string",
+                "description": "Relationship label (e.g. 'references', 'caused', 'supersedes', 'related_to')",
+            },
+            "weight": {
+                "type": "number",
+                "description": "Edge weight from 0.0 to 1.0 (default: 0.5)",
+                "default": 0.5,
+            },
+        },
+        "required": ["source_id", "target_id", "relationship"],
+    },
+}
+
+SYNC_PUSH_SCHEMA = {
+    "name": "mnemosyne_sync_push",
+    "description": (
+        "Push local memory changes to a remote Mnemosyne sync server. "
+        "Only events created since the last sync are sent. Requires a "
+        "configured remote sync server (configured via config.yaml or "
+        "MNEMOSYNE_SYNC_REMOTE env var)."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+    },
+}
+
+SYNC_PULL_SCHEMA = {
+    "name": "mnemosyne_sync_pull",
+    "description": (
+        "Pull remote memory changes from the configured Mnemosyne sync server. "
+        "Applies incoming events locally with timestamp + importance conflict "
+        "resolution."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+    },
+}
+
+SYNC_STATUS_SCHEMA = {
+    "name": "mnemosyne_sync_status",
+    "description": (
+        "Show Mnemosyne sync status: device ID, last cursor, event count, "
+        "remote URL, and encryption state."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+    },
+}
+
+PERSONA_PROMOTE_SCHEMA = {
+    "name": "mnemosyne_persona_promote",
+    "description": (
+        "Promote a working or episodic memory into the L3 persona store "
+        "(the memoria_persona table). Tier values: 'permanent', 'long_term' "
+        "(default), 'working'. Tier is a classification label: it orders "
+        "mnemosyne_persona_list output (permanent first) and affects nothing "
+        "else. No automatic eviction or decay is implemented, and a fact "
+        "leaves the store only by explicit demotion. Persona facts are not "
+        "read by the system prompt path, which uses the opt-in persona.md "
+        "file. Returns the new persona id."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "memory_id": {
+                "type": "string",
+                "description": "ID of the source memory in working_memory or episodic_memory.",
+            },
+            "tier": {
+                "type": "string",
+                "enum": ["permanent", "long_term", "working"],
+                "default": "long_term",
+                "description": "Classification tier for the promoted persona fact; affects mnemosyne_persona_list ordering only.",
+            },
+            "reason": {
+                "type": "string",
+                "default": "",
+                "description": "Optional human-readable reason for the promotion (logged for audit).",
+            },
+        },
+        "required": ["memory_id"],
+    },
+}
+
+PERSONA_DEMOTE_SCHEMA = {
+    "name": "mnemosyne_persona_demote",
+    "description": (
+        "Move a persona fact back to memoria_preferences (acting as a tombstone). "
+        "Use when a previously-promoted rule no longer applies or was a one-off. "
+        "Returns the demoted persona id and the new preference record location."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "persona_id": {
+                "type": "integer",
+                "description": "ID of the persona row to demote.",
+            },
+            "reason": {
+                "type": "string",
+                "default": "",
+                "description": "Optional reason for the demotion.",
+            },
+        },
+        "required": ["persona_id"],
+    },
+}
+
+PERSONA_LIST_SCHEMA = {
+    "name": "mnemosyne_persona_list",
+    "description": (
+        "List L3 persona facts, optionally filtered by tier and/or topic. "
+        "Returns personas ordered by tier (permanent first), then by reinforcement "
+        "count descending (most-used first)."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "tier": {
+                "type": "string",
+                "enum": ["permanent", "long_term", "working"],
+                "description": "Optional tier filter.",
+            },
+            "topic": {
+                "type": "string",
+                "description": "Optional topic filter (exact match).",
+            },
+        },
+    },
+}
+
+PERSONA_REINFORCE_SCHEMA = {
+    "name": "mnemosyne_persona_reinforce",
+    "description": (
+        "Bump the reinforcement_count and last_reinforced_at on a persona fact. "
+        "Use when the persona rule was just applied -- signals 'this rule is in "
+        "active use'. Reinforcement count breaks ties in mnemosyne_persona_list "
+        "ordering; it does not feed any decay logic, because none is implemented."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "persona_id": {
+                "type": "integer",
+                "description": "ID of the persona row to reinforce.",
+            },
+        },
+        "required": ["persona_id"],
+    },
+}
+
+# ---------------------------------------------------------------------------
+# Hygiene tools (issue #428)
+# ---------------------------------------------------------------------------
+
+HYGIENE_AUDIT_SCHEMA = {
+    "name": "mnemosyne_hygiene_audit",
+    "description": (
+        "Audit the memory database for noise: terminal spam, command output, "
+        "heartbeats, stack traces, secrets. Returns ranked candidates sorted "
+        "by noise score. Dry-run only — does not modify the database. "
+        "Use mnemosyne_hygiene_clean to act on the results."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "limit": {
+                "type": "integer",
+                "description": "Max rows to scan per table (default 200, ignored when scan_all is true).",
+                "default": 200,
+            },
+            "offset": {
+                "type": "integer",
+                "description": "Row offset per table for paginated audits (default 0).",
+                "default": 0,
+            },
+            "scan_all": {
+                "type": "boolean",
+                "description": "Scan all rows in each selected table using batches instead of a single limit.",
+                "default": False,
+            },
+            "batch_size": {
+                "type": "integer",
+                "description": "Batch size when scan_all is true (default 1000).",
+                "default": 1000,
+            },
+            "min_score": {
+                "type": "number",
+                "description": "Minimum noise score to include (0.0-1.0, default 0.3).",
+                "default": 0.3,
+            },
+            "tables": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": ["working_memory", "memories", "episodic_memory", "scratchpad"],
+                },
+                "description": "Tables to scan. Default: working_memory + memories + episodic_memory.",
+            },
+            "bank": {
+                "type": "string",
+                "description": "Memory bank to audit (default: 'default').",
+            },
+        },
+    },
+}
+
+HYGIENE_CLEAN_SCHEMA = {
+    "name": "mnemosyne_hygiene_clean",
+    "description": (
+        "Clean noise candidates identified by mnemosyne_hygiene_audit. "
+        "Actions: 'delete' (hard delete), 'archive' (decay importance to 0 + "
+        "flag metadata, reversible), 'flag' (mark for review, no change). "
+        "Requires confirm=true for any modification. Writes a full audit log "
+        "to the hygiene_audit_log table."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "candidates_json": {
+                "type": "string",
+                "description": "JSON array of candidate objects from audit_noise() output.",
+            },
+            "action": {
+                "type": "string",
+                "enum": ["delete", "archive", "flag", "keep"],
+                "description": "Override action for all candidates. If 'keep', uses each candidate's suggested_action.",
+                "default": "keep",
+            },
+            "confirm": {
+                "type": "boolean",
+                "description": "Must be true for any modification. If false, performs dry-run only.",
+                "default": False,
+            },
+            "bank": {
+                "type": "string",
+                "description": "Memory bank (default: 'default').",
+            },
+        },
+        "required": ["candidates_json"],
+    },
+}
+
+ALL_TOOL_SCHEMAS: List[Dict[str, Any]] = [
+    REMEMBER_SCHEMA, RECALL_SCHEMA,
+    SHARED_REMEMBER_SCHEMA, SHARED_RECALL_SCHEMA, SHARED_FORGET_SCHEMA, SHARED_STATS_SCHEMA,
+    SLEEP_SCHEMA, STATS_SCHEMA,
+    INVALIDATE_SCHEMA, VALIDATE_SCHEMA, GET_SCHEMA,
+    TRIPLE_ADD_SCHEMA, TRIPLE_QUERY_SCHEMA, TRIPLE_END_SCHEMA,
+    REMEMBER_CANONICAL_SCHEMA, RECALL_CANONICAL_SCHEMA, FORGET_CANONICAL_SCHEMA,
+    SCRATCHPAD_WRITE_SCHEMA, SCRATCHPAD_READ_SCHEMA, SCRATCHPAD_CLEAR_SCHEMA,
+    EXPORT_SCHEMA, UPDATE_SCHEMA, FORGET_SCHEMA, BATCH_SCHEMA, IMPORT_SCHEMA, DIAGNOSE_SCHEMA,
+    GRAPH_QUERY_SCHEMA, GRAPH_LINK_SCHEMA,
+    SYNC_PUSH_SCHEMA, SYNC_PULL_SCHEMA, SYNC_STATUS_SCHEMA,
+    PERSONA_PROMOTE_SCHEMA, PERSONA_DEMOTE_SCHEMA, PERSONA_LIST_SCHEMA, PERSONA_REINFORCE_SCHEMA,
+    HYGIENE_AUDIT_SCHEMA, HYGIENE_CLEAN_SCHEMA,
+]
+
+
+# ---------------------------------------------------------------------------
+# Tenant bank declaration
+# ---------------------------------------------------------------------------
+#
+# ``_resolve_bank()`` in ``mcp_tools`` has always read ``arguments["bank"]``
+# before falling back to ``MNEMOSYNE_MCP_BANK``, so nearly every tool already
+# honours a per-call bank at runtime. Almost none of them said so in their
+# schema, which left the capability undiscoverable: a conforming MCP client
+# has no way to learn about a parameter that is not declared, and a client
+# that validates arguments against the advertised schema may strip it.
+#
+# Declaring it here rather than editing each schema literal keeps the property
+# wording identical across tools and means a tool added later cannot silently
+# forget it. Membership is decided by an explicit exemption set, so adding a
+# tool that must not take a tenant bank is a deliberate edit rather than an
+# omission.
+
+BANK_PROPERTY: Dict[str, Any] = {
+    "type": "string",
+    "description": (
+        "Memory bank to operate on. Banks are separate stores: memories written "
+        "to one are not visible to another, which is how a single MCP server "
+        "serves more than one tenant. Defaults to the server's "
+        "MNEMOSYNE_MCP_BANK, or 'default'."
+    ),
+}
+
+# Tools that must not receive a tenant bank.
+#
+# ``mnemosyne_validate`` declares its own ``bank``: it is the tenant bank, as
+# everywhere else, but its description also documents the deprecated alias
+# where ``bank`` carried ``private``/``surface`` (now ``store``). Because the
+# schema already spells ``bank`` out, ``_declare_bank`` leaves it alone.
+#
+# The ``mnemosyne_shared_*`` tools operate on the shared surface database,
+# which is a single global store by design. A tenant bank has no meaning
+# there, and accepting one would imply an isolation guarantee that does not
+# exist.
+#
+# The persona, sync and ``mnemosyne_triple_end`` schemas are defined here for
+# the Hermes provider, which pins its own copies to these definitions. The MCP
+# dispatcher in ``mcp_tools`` does not serve them, so no per-call bank is ever
+# read for them; the provider resolves its bank per Hermes profile instead.
+# Declaring ``bank`` on them would advertise a parameter nothing honours.
+BANK_EXEMPT_TOOLS: frozenset = frozenset({
+    "mnemosyne_shared_remember",
+    "mnemosyne_shared_recall",
+    "mnemosyne_shared_forget",
+    "mnemosyne_shared_stats",
+    "mnemosyne_triple_end",
+    "mnemosyne_sync_push",
+    "mnemosyne_sync_pull",
+    "mnemosyne_sync_status",
+    "mnemosyne_persona_promote",
+    "mnemosyne_persona_demote",
+    "mnemosyne_persona_list",
+    "mnemosyne_persona_reinforce",
+})
+
+
+def _declare_bank(schemas: List[Dict[str, Any]]) -> None:
+    """Add ``bank`` to every non-exempt schema that does not already declare it.
+
+    Mutates in place, at import, so ``ALL_TOOL_SCHEMAS`` and everything built
+    from it observe the same objects. Schemas that already spell out their own
+    ``bank`` are left untouched.
+    """
+    for schema in schemas:
+        if schema.get("name") in BANK_EXEMPT_TOOLS:
+            continue
+        container = schema.get("parameters") or schema.get("inputSchema")
+        if not isinstance(container, dict):
+            continue
+        properties = container.setdefault("properties", {})
+        if not isinstance(properties, dict) or "bank" in properties:
+            continue
+        properties["bank"] = dict(BANK_PROPERTY)
+
+
+_declare_bank(ALL_TOOL_SCHEMAS)

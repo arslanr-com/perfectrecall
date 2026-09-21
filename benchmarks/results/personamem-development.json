@@ -1,0 +1,265 @@
+{
+  "label": "personamem-development",
+  "status": "completed",
+  "source_report_sha256": {
+    "baseline": "f43fb5223621dc26e5fbad742aced02d4b580fe57ddd1598bf20055f3ea522c5",
+    "jev": "bc26c77c348008bdbfc3ddccd8b53f18cd9818c1efcea29a0759b46f61f783dd"
+  },
+  "cases": [
+    {
+      "id": "personamem-v2-554-c797b4cd04a49f39",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-583-27fcd0f777fb134b",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-543-2eae6d25d2615a98",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-425-d01d773ce7f59e00",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-948-8d21a166a67b2149",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-184-dbbbc771e88c6c60",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-687-21e5309acae1a3f5",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-837-3649a8ee9091bb3e",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-218-b7d3d0fccc9e4185",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-275-4cab65eabc7b4765",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-829-a5b7947af098baa1",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-76-155acf0a54bc508d",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-361-51f1878e157e44b0",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-215-6bfe7054d58abda8",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-678-1ad3e64911ade8f7",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-54-8f7169cf560d0fd3",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-120-f55ce1e7a0bb43b0",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": false
+    },
+    {
+      "id": "personamem-v2-767-407628bb7963425b",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-652-e97d1d62f7fa4d54",
+      "kind": "personamem-preference",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "personamem-v2-986-b4c5185a6de1cd7b",
+      "kind": "personamem-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    }
+  ],
+  "summary": {
+    "cases": 20,
+    "baseline_errors": 9,
+    "jev_errors": 9,
+    "relative_error_reduction": 0.0,
+    "baseline_accuracy": 0.55,
+    "jev_accuracy": 0.55,
+    "repairs": 1,
+    "regressions": 1
+  },
+  "baseline_plan": {
+    "protocol": "jevosyne-agentic-memory-v1",
+    "scope": "diagnostic",
+    "backend": "baseline",
+    "dataset_sha256": "43e16b4768cb961e3e10daa8605b51b0f6d802bbdbacae91c7abc70333c6949b",
+    "selected_ids": [
+      "personamem-v2-554-c797b4cd04a49f39",
+      "personamem-v2-583-27fcd0f777fb134b",
+      "personamem-v2-543-2eae6d25d2615a98",
+      "personamem-v2-425-d01d773ce7f59e00",
+      "personamem-v2-948-8d21a166a67b2149",
+      "personamem-v2-184-dbbbc771e88c6c60",
+      "personamem-v2-687-21e5309acae1a3f5",
+      "personamem-v2-837-3649a8ee9091bb3e",
+      "personamem-v2-218-b7d3d0fccc9e4185",
+      "personamem-v2-275-4cab65eabc7b4765",
+      "personamem-v2-829-a5b7947af098baa1",
+      "personamem-v2-76-155acf0a54bc508d",
+      "personamem-v2-361-51f1878e157e44b0",
+      "personamem-v2-215-6bfe7054d58abda8",
+      "personamem-v2-678-1ad3e64911ade8f7",
+      "personamem-v2-54-8f7169cf560d0fd3",
+      "personamem-v2-120-f55ce1e7a0bb43b0",
+      "personamem-v2-767-407628bb7963425b",
+      "personamem-v2-652-e97d1d62f7fa4d54",
+      "personamem-v2-986-b4c5185a6de1cd7b"
+    ],
+    "source_sha256": "4c94832d0b37c635e70ca6fa82c47cda4d2b3aa997039eb7216c1ec8004393b1",
+    "schema_sha256": "16da52544e71e537a1db90d67f9b79d70b7ccc36c85f7beb06c0e5d3171fedbe",
+    "harness_sha256": "c520789065968b1d2bf9113dd6e2aa5a47d218753431de91a88101b9fb62e198",
+    "client_sha256": "cbb748ffe05cb412517932e77abf3001b8e3ad22787fc7b9b12579615e5dacb4",
+    "caller_model": "openai/gpt-5.6-luna",
+    "reasoning_effort": "high",
+    "judge_model": "openai/gpt-4.1",
+    "answer_max_tokens": 16384,
+    "searches": 3,
+    "records": 20,
+    "context_chars": 120000,
+    "chunk_chars": 6000,
+    "prompt_sha256": {
+      "personamem_caller.py": "3f524373fabc71ff9dc0e9e193c66c574f8dc41a65bb09bd83e8a2df61d7a697",
+      "personamem_judge.py": "3fc822e60463f00ceda26a30259617694dfa6a432d880f8c51f7fdd266b76a5d"
+    },
+    "surface": "Actual tool description; common query/limit/temporal subset plus Jev criteria"
+  },
+  "baseline_usage": {
+    "embedding_usage": {
+      "requests": 45,
+      "input_tokens": 2421664,
+      "cost_usd": 0.0,
+      "upstream_cost_usd": 0.04843328
+    },
+    "summary": {
+      "cases": 20,
+      "errors": 9
+    }
+  },
+  "jev_plan": {
+    "protocol": "jevosyne-agentic-memory-v1",
+    "scope": "diagnostic",
+    "backend": "jev",
+    "dataset_sha256": "43e16b4768cb961e3e10daa8605b51b0f6d802bbdbacae91c7abc70333c6949b",
+    "selected_ids": [
+      "personamem-v2-554-c797b4cd04a49f39",
+      "personamem-v2-583-27fcd0f777fb134b",
+      "personamem-v2-543-2eae6d25d2615a98",
+      "personamem-v2-425-d01d773ce7f59e00",
+      "personamem-v2-948-8d21a166a67b2149",
+      "personamem-v2-184-dbbbc771e88c6c60",
+      "personamem-v2-687-21e5309acae1a3f5",
+      "personamem-v2-837-3649a8ee9091bb3e",
+      "personamem-v2-218-b7d3d0fccc9e4185",
+      "personamem-v2-275-4cab65eabc7b4765",
+      "personamem-v2-829-a5b7947af098baa1",
+      "personamem-v2-76-155acf0a54bc508d",
+      "personamem-v2-361-51f1878e157e44b0",
+      "personamem-v2-215-6bfe7054d58abda8",
+      "personamem-v2-678-1ad3e64911ade8f7",
+      "personamem-v2-54-8f7169cf560d0fd3",
+      "personamem-v2-120-f55ce1e7a0bb43b0",
+      "personamem-v2-767-407628bb7963425b",
+      "personamem-v2-652-e97d1d62f7fa4d54",
+      "personamem-v2-986-b4c5185a6de1cd7b"
+    ],
+    "source_sha256": "183af1ec39b75157c200bfb6169ca1a147d3c3f52fff4567ba5ffb61e400689e",
+    "schema_sha256": "c774e4fa8669be5d8790fa63eec218ab420bb8cda64f368c6d034f71e11f6810",
+    "harness_sha256": "c520789065968b1d2bf9113dd6e2aa5a47d218753431de91a88101b9fb62e198",
+    "client_sha256": "cbb748ffe05cb412517932e77abf3001b8e3ad22787fc7b9b12579615e5dacb4",
+    "caller_model": "openai/gpt-5.6-luna",
+    "reasoning_effort": "high",
+    "judge_model": "openai/gpt-4.1",
+    "answer_max_tokens": 16384,
+    "searches": 3,
+    "records": 20,
+    "context_chars": 120000,
+    "chunk_chars": 6000,
+    "prompt_sha256": {
+      "personamem_caller.py": "3f524373fabc71ff9dc0e9e193c66c574f8dc41a65bb09bd83e8a2df61d7a697",
+      "personamem_judge.py": "3fc822e60463f00ceda26a30259617694dfa6a432d880f8c51f7fdd266b76a5d"
+    },
+    "surface": "Actual tool description; common query/limit/temporal subset plus Jev criteria"
+  },
+  "jev_usage": {
+    "jev_usage": {
+      "requests": 26495,
+      "input_tokens": 12803469,
+      "output_tokens": 1377740,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 12210.77901149448,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.5377456979999976,
+      "priced_responses": 26495
+    },
+    "embedding_usage": {
+      "requests": 0,
+      "input_tokens": 0,
+      "cost_usd": 0.0,
+      "upstream_cost_usd": 0.0
+    },
+    "summary": {
+      "cases": 20,
+      "errors": 9
+    }
+  }
+}

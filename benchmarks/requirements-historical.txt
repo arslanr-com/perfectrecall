@@ -1,0 +1,4 @@
+# Install only in the separate historical comparison environment.
+# The original Mnemosyne baseline performs API embeddings using NumPy.
+numpy==2.5.3
+PyYAML==6.0.3

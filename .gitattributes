@@ -1,0 +1,2 @@
+# Frozen evaluation sources must retain their exact original bytes.
+benchmarks/historical/** -whitespace

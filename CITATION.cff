@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use PerfectRecall in research, cite this software and the benchmark datasets separately."
+title: PerfectRecall
+authors:
+  - name: Arslan
+version: 0.1.0a1
+license: MIT
+repository-code: "https://github.com/arslanr-com/perfectrecall"
+url: "https://github.com/arslanr-com/perfectrecall"
+type: software

@@ -1,0 +1,1057 @@
+{
+  "label": "longmemeval-development",
+  "status": "completed",
+  "source_report_sha256": {
+    "baseline": "c649e26e87236b72b399153081f7cb5fe1a108b5461c93a77e0478ea68780b0d",
+    "jev": "6a4a9086895de2712fd0e35109f0f082db722aeaa9b0a8f00b7f412a0bc6660b"
+  },
+  "cases": [
+    {
+      "id": "59524333",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "8fb83627",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "184da446",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "7401057b",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "945e3d21",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "22d2cb42",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "b6019101",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "41698283",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "618f13b2",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": false
+    },
+    {
+      "id": "603deb26",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "031748ae_abs",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "89941a94",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "db467c8c",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "dfde3500",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "3ba21379",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": false
+    },
+    {
+      "id": "07741c45",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "01493427",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "e66b632c",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "6071bd76",
+      "kind": "knowledge-update",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "eace081b",
+      "kind": "knowledge-update",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "85fa3a3f",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "edced276",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_372c3eed_abs",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "60036106",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "157a136e",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "d905b33f",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "d851d5ba",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": false
+    },
+    {
+      "id": "6c49646a",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "dd2973ad",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "099778bb",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "0ea62687",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "1a8a66a6",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "2318644b",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "6456829e",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "55241a1f",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "2e6d26dc",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "3c1045c8",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "21d02d0d",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "8e91e7d9",
+      "kind": "multi-session",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "2311e44b_abs",
+      "kind": "multi-session",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "8752c811",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "c8f1aeed",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "5809eb10",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "1de5cff2",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "58470ed2",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "1903aded",
+      "kind": "single-session-assistant",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "cc539528",
+      "kind": "single-session-assistant",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "fca762bc",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "7a8d0b71",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "8b9d4367",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "b759caee",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "3249768e",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "41275add",
+      "kind": "single-session-assistant",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "e48988bc",
+      "kind": "single-session-assistant",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "3e321797",
+      "kind": "single-session-assistant",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "ac031881",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "6222b6eb",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "16c90bf4",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "488d3006",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "4baee567",
+      "kind": "single-session-assistant",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "d6233ab6",
+      "kind": "single-session-preference",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "1c0ddc50",
+      "kind": "single-session-preference",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "75f70248",
+      "kind": "single-session-preference",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "caf03d32",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "1da05512",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "d24813b1",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "32260d93",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "09d032c9",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": false
+    },
+    {
+      "id": "afdc33df",
+      "kind": "single-session-preference",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "1a1907b4",
+      "kind": "single-session-preference",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "6b7dfb22",
+      "kind": "single-session-preference",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "57f827a0",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "54026fce",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "fca70973",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "38146c39",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "35a27287",
+      "kind": "single-session-preference",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "75832dbd",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": false
+    },
+    {
+      "id": "b0479f84",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "8a2466db",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "06878be2",
+      "kind": "single-session-preference",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "19b5f2b3_abs",
+      "kind": "single-session-user",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "58bf7951",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "d52b4f67",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "8ebdbe50",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "21436231",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "a06e4cfe",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "f4f1d8a4_abs",
+      "kind": "single-session-user",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "ec81a493",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "86b68151",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "4100d0a0",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "75499fd8",
+      "kind": "single-session-user",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "25e5aa4f",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "6f9b354f",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "001be529",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "8550ddae",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "c960da58",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "545bd2b5",
+      "kind": "single-session-user",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "6ade9755",
+      "kind": "single-session-user",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "bc8a6e93",
+      "kind": "single-session-user",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "bc8a6e93_abs",
+      "kind": "single-session-user",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_cd90e484",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_1916e0ea",
+      "kind": "temporal-reasoning",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_1e4a8aec",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_b5700ca9",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_7a0daae1",
+      "kind": "temporal-reasoning",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_b4a80587",
+      "kind": "temporal-reasoning",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_18c2b244",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_ec93e27f",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_78cf46a3",
+      "kind": "temporal-reasoning",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_8e165409",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "2ebe6c90",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_c27434e8_abs",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_4ef30696",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_0b2f1d21",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_7f6b06db",
+      "kind": "temporal-reasoning",
+      "baseline_correct": false,
+      "jev_correct": false
+    },
+    {
+      "id": "gpt4_0a05b494",
+      "kind": "temporal-reasoning",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "0bb5a684",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "gpt4_88806d6e",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    },
+    {
+      "id": "4dfccbf8",
+      "kind": "temporal-reasoning",
+      "baseline_correct": false,
+      "jev_correct": true
+    },
+    {
+      "id": "6e984302",
+      "kind": "temporal-reasoning",
+      "baseline_correct": true,
+      "jev_correct": true
+    }
+  ],
+  "summary": {
+    "cases": 120,
+    "baseline_errors": 62,
+    "jev_errors": 11,
+    "relative_error_reduction": 0.8225806451612903,
+    "baseline_accuracy": 0.4833333333333333,
+    "jev_accuracy": 0.9083333333333333,
+    "repairs": 56,
+    "regressions": 5
+  },
+  "baseline_plan": {
+    "protocol": "jevosyne-agentic-memory-v1",
+    "scope": "frozen-independent",
+    "backend": "baseline",
+    "dataset_sha256": "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442",
+    "source_sha256": "4c94832d0b37c635e70ca6fa82c47cda4d2b3aa997039eb7216c1ec8004393b1",
+    "schema_sha256": "16da52544e71e537a1db90d67f9b79d70b7ccc36c85f7beb06c0e5d3171fedbe",
+    "harness_sha256": "ef74bc40c6cfb2d394e26b54c544bc8e0b37a7bc37b9159de5b3162537385b28",
+    "client_sha256": "a03611b37169899c7bbcf992c1c45208bc190b3dc4d4b8780f6360103a17225e",
+    "caller_model": "openai/gpt-5.6-luna",
+    "reasoning_effort": "high",
+    "judge_model": "openai/gpt-4.1",
+    "answer_max_tokens": 16384,
+    "searches": 3,
+    "records": 20,
+    "context_chars": 120000,
+    "chunk_chars": 6000,
+    "surface": "Actual tool description; common query/limit/temporal subset plus Jev criteria",
+    "selected_ids": [
+      "59524333",
+      "8fb83627",
+      "184da446",
+      "7401057b",
+      "945e3d21",
+      "22d2cb42",
+      "b6019101",
+      "41698283",
+      "618f13b2",
+      "603deb26",
+      "031748ae_abs",
+      "89941a94",
+      "db467c8c",
+      "dfde3500",
+      "3ba21379",
+      "07741c45",
+      "01493427",
+      "e66b632c",
+      "6071bd76",
+      "eace081b",
+      "85fa3a3f",
+      "edced276",
+      "gpt4_372c3eed_abs",
+      "60036106",
+      "157a136e",
+      "d905b33f",
+      "d851d5ba",
+      "6c49646a",
+      "dd2973ad",
+      "099778bb",
+      "0ea62687",
+      "1a8a66a6",
+      "2318644b",
+      "6456829e",
+      "55241a1f",
+      "2e6d26dc",
+      "3c1045c8",
+      "21d02d0d",
+      "8e91e7d9",
+      "2311e44b_abs",
+      "8752c811",
+      "c8f1aeed",
+      "5809eb10",
+      "1de5cff2",
+      "58470ed2",
+      "1903aded",
+      "cc539528",
+      "fca762bc",
+      "7a8d0b71",
+      "8b9d4367",
+      "b759caee",
+      "3249768e",
+      "41275add",
+      "e48988bc",
+      "3e321797",
+      "ac031881",
+      "6222b6eb",
+      "16c90bf4",
+      "488d3006",
+      "4baee567",
+      "d6233ab6",
+      "1c0ddc50",
+      "75f70248",
+      "caf03d32",
+      "1da05512",
+      "d24813b1",
+      "32260d93",
+      "09d032c9",
+      "afdc33df",
+      "1a1907b4",
+      "6b7dfb22",
+      "57f827a0",
+      "54026fce",
+      "fca70973",
+      "38146c39",
+      "35a27287",
+      "75832dbd",
+      "b0479f84",
+      "8a2466db",
+      "06878be2",
+      "19b5f2b3_abs",
+      "58bf7951",
+      "d52b4f67",
+      "8ebdbe50",
+      "21436231",
+      "a06e4cfe",
+      "f4f1d8a4_abs",
+      "ec81a493",
+      "86b68151",
+      "4100d0a0",
+      "75499fd8",
+      "25e5aa4f",
+      "6f9b354f",
+      "001be529",
+      "8550ddae",
+      "c960da58",
+      "545bd2b5",
+      "6ade9755",
+      "bc8a6e93",
+      "bc8a6e93_abs",
+      "gpt4_cd90e484",
+      "gpt4_1916e0ea",
+      "gpt4_1e4a8aec",
+      "gpt4_b5700ca9",
+      "gpt4_7a0daae1",
+      "gpt4_b4a80587",
+      "gpt4_18c2b244",
+      "gpt4_ec93e27f",
+      "gpt4_78cf46a3",
+      "gpt4_8e165409",
+      "2ebe6c90",
+      "gpt4_c27434e8_abs",
+      "gpt4_4ef30696",
+      "gpt4_0b2f1d21",
+      "gpt4_7f6b06db",
+      "gpt4_0a05b494",
+      "0bb5a684",
+      "gpt4_88806d6e",
+      "4dfccbf8",
+      "6e984302"
+    ]
+  },
+  "baseline_usage": {
+    "embedding_usage": {
+      "input_tokens": 12860490,
+      "upstream_cost_usd": 0.2572098,
+      "requests": 369,
+      "cost_usd": 0.0
+    },
+    "summary": {
+      "cases": 120,
+      "errors": 62
+    }
+  },
+  "jev_plan": {
+    "protocol": "jevosyne-agentic-memory-v1",
+    "scope": "diagnostic",
+    "backend": "jev",
+    "dataset_sha256": "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442",
+    "source_sha256": "183af1ec39b75157c200bfb6169ca1a147d3c3f52fff4567ba5ffb61e400689e",
+    "schema_sha256": "c774e4fa8669be5d8790fa63eec218ab420bb8cda64f368c6d034f71e11f6810",
+    "harness_sha256": "ef74bc40c6cfb2d394e26b54c544bc8e0b37a7bc37b9159de5b3162537385b28",
+    "client_sha256": "a03611b37169899c7bbcf992c1c45208bc190b3dc4d4b8780f6360103a17225e",
+    "caller_model": "openai/gpt-5.6-luna",
+    "reasoning_effort": "high",
+    "judge_model": "openai/gpt-4.1",
+    "answer_max_tokens": 16384,
+    "searches": 3,
+    "records": 20,
+    "context_chars": 120000,
+    "chunk_chars": 6000,
+    "surface": "Actual tool description; common query/limit/temporal subset plus Jev criteria",
+    "selected_ids": [
+      "59524333",
+      "8fb83627",
+      "184da446",
+      "7401057b",
+      "945e3d21",
+      "22d2cb42",
+      "b6019101",
+      "41698283",
+      "618f13b2",
+      "603deb26",
+      "031748ae_abs",
+      "89941a94",
+      "db467c8c",
+      "dfde3500",
+      "3ba21379",
+      "07741c45",
+      "01493427",
+      "e66b632c",
+      "6071bd76",
+      "eace081b",
+      "85fa3a3f",
+      "edced276",
+      "gpt4_372c3eed_abs",
+      "60036106",
+      "157a136e",
+      "d905b33f",
+      "d851d5ba",
+      "6c49646a",
+      "dd2973ad",
+      "099778bb",
+      "0ea62687",
+      "1a8a66a6",
+      "2318644b",
+      "6456829e",
+      "55241a1f",
+      "2e6d26dc",
+      "3c1045c8",
+      "21d02d0d",
+      "8e91e7d9",
+      "2311e44b_abs",
+      "8752c811",
+      "c8f1aeed",
+      "5809eb10",
+      "1de5cff2",
+      "58470ed2",
+      "1903aded",
+      "cc539528",
+      "fca762bc",
+      "7a8d0b71",
+      "8b9d4367",
+      "b759caee",
+      "3249768e",
+      "41275add",
+      "e48988bc",
+      "3e321797",
+      "ac031881",
+      "6222b6eb",
+      "16c90bf4",
+      "488d3006",
+      "4baee567",
+      "d6233ab6",
+      "1c0ddc50",
+      "75f70248",
+      "caf03d32",
+      "1da05512",
+      "d24813b1",
+      "32260d93",
+      "09d032c9",
+      "afdc33df",
+      "1a1907b4",
+      "6b7dfb22",
+      "57f827a0",
+      "54026fce",
+      "fca70973",
+      "38146c39",
+      "35a27287",
+      "75832dbd",
+      "b0479f84",
+      "8a2466db",
+      "06878be2",
+      "19b5f2b3_abs",
+      "58bf7951",
+      "d52b4f67",
+      "8ebdbe50",
+      "21436231",
+      "a06e4cfe",
+      "f4f1d8a4_abs",
+      "ec81a493",
+      "86b68151",
+      "4100d0a0",
+      "75499fd8",
+      "25e5aa4f",
+      "6f9b354f",
+      "001be529",
+      "8550ddae",
+      "c960da58",
+      "545bd2b5",
+      "6ade9755",
+      "bc8a6e93",
+      "bc8a6e93_abs",
+      "gpt4_cd90e484",
+      "gpt4_1916e0ea",
+      "gpt4_1e4a8aec",
+      "gpt4_b5700ca9",
+      "gpt4_7a0daae1",
+      "gpt4_b4a80587",
+      "gpt4_18c2b244",
+      "gpt4_ec93e27f",
+      "gpt4_78cf46a3",
+      "gpt4_8e165409",
+      "2ebe6c90",
+      "gpt4_c27434e8_abs",
+      "gpt4_4ef30696",
+      "gpt4_0b2f1d21",
+      "gpt4_7f6b06db",
+      "gpt4_0a05b494",
+      "0bb5a684",
+      "gpt4_88806d6e",
+      "4dfccbf8",
+      "6e984302"
+    ]
+  },
+  "jev_usage": {
+    "jev_usage": {
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "input_tokens": 56653592,
+      "failures": 46,
+      "requests": 104514,
+      "cost_usd": 2.379450863999996,
+      "output_tokens": 4798424,
+      "seconds": 139570.43944546298,
+      "priced_responses": 104390,
+      "cache_hits": 58
+    },
+    "embedding_usage": {
+      "upstream_cost_usd": 0.0,
+      "cost_usd": 0.0,
+      "requests": 0,
+      "input_tokens": 0
+    },
+    "summary": {
+      "cases": 120,
+      "errors": 11
+    }
+  }
+}
