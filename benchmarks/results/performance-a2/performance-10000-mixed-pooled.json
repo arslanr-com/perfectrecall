@@ -1,0 +1,601 @@
+{
+  "synthetic": true,
+  "records": 10000,
+  "shape": "mixed",
+  "batch_mode": "question",
+  "http_transport": "pooled",
+  "workers": 128,
+  "serial_dedup": false,
+  "fixture_sha256": "ea1a943d7f200bb2a20c9810d0fe240a8a0143c4af9234b50fc150c4dcdeb1e5",
+  "corpus_characters": 5318099,
+  "wheel_sha256": "9e70860514d9230a9aae94b1147d4a126f96a5ee889ab0335600020b8f4537dd",
+  "runs": [
+    {
+      "iteration": 0,
+      "temperature": "cold",
+      "host_elapsed_seconds": 5.9614417089906055,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 436,
+        "input_tokens": 2463057,
+        "output_tokens": 232080,
+        "cache_hits": 0,
+        "failures": 0,
+        "seconds": 594.7715207467554,
+        "cost_usd": 0.10344839399999947,
+        "priced_responses": 436,
+        "decision_cache_hits": 0,
+        "deadline_exceeded": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 5.959120332991006,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 5.26946116698673,
+            "usage": {
+              "requests": 421,
+              "input_tokens": 2448266,
+              "output_tokens": 230085,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 421,
+              "cost_usd": 0.10282717199999944,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 0.00010766700142994523,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.6877760000061244,
+            "usage": {
+              "requests": 15,
+              "input_tokens": 14791,
+              "output_tokens": 1995,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 15,
+              "cost_usd": 0.0006212220000000324,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0016440830077044666,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          }
+        }
+      },
+      "prefetch": {
+        "status": "completed",
+        "budget_seconds": 6.5,
+        "context_injected": true,
+        "elapsed_seconds": 5.96130904200254
+      }
+    },
+    {
+      "iteration": 0,
+      "temperature": "warm",
+      "host_elapsed_seconds": 0.49969683299423195,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_hits": 15,
+        "failures": 0,
+        "seconds": 0.0,
+        "cost_usd": 0.0,
+        "priced_responses": 0,
+        "decision_cache_hits": 13683,
+        "deadline_exceeded": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 0.4992083749966696,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 0.4955315839906689,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 13683,
+              "deadline_exceeded": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 3.6375015042722225e-05,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.002944292005850002,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 15,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0006304169946815819,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          }
+        }
+      },
+      "prefetch": {
+        "status": "completed",
+        "budget_seconds": 6.5,
+        "context_injected": true,
+        "elapsed_seconds": 0.49957104100030847
+      }
+    },
+    {
+      "iteration": 1,
+      "temperature": "cold",
+      "host_elapsed_seconds": 5.4019115830014925,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 436,
+        "input_tokens": 2463039,
+        "output_tokens": 232080,
+        "cache_hits": 0,
+        "failures": 0,
+        "seconds": 528.001224994252,
+        "cost_usd": 0.10344763799999743,
+        "priced_responses": 436,
+        "decision_cache_hits": 0,
+        "deadline_exceeded": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 5.40141454199329,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 4.783698874991387,
+            "usage": {
+              "requests": 421,
+              "input_tokens": 2448266,
+              "output_tokens": 230085,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 421,
+              "cost_usd": 0.10282717199999744,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 5.858400254510343e-05,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.6166050000174437,
+            "usage": {
+              "requests": 15,
+              "input_tokens": 14773,
+              "output_tokens": 1995,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 15,
+              "cost_usd": 0.0006204659999999862,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0009653749875724316,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          }
+        }
+      },
+      "prefetch": {
+        "status": "completed",
+        "budget_seconds": 6.5,
+        "context_injected": true,
+        "elapsed_seconds": 5.401837124984013
+      }
+    },
+    {
+      "iteration": 1,
+      "temperature": "warm",
+      "host_elapsed_seconds": 0.47547737500281073,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_hits": 15,
+        "failures": 0,
+        "seconds": 0.0,
+        "cost_usd": 0.0,
+        "priced_responses": 0,
+        "decision_cache_hits": 13683,
+        "deadline_exceeded": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 0.4750646250031423,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 0.4714701249904465,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 13683,
+              "deadline_exceeded": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 3.62499849870801e-05,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.0028278339887037873,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 15,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0006777500093448907,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          }
+        }
+      },
+      "prefetch": {
+        "status": "completed",
+        "budget_seconds": 6.5,
+        "context_injected": true,
+        "elapsed_seconds": 0.4753719999862369
+      }
+    },
+    {
+      "iteration": 2,
+      "temperature": "cold",
+      "host_elapsed_seconds": 4.927997166989371,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 436,
+        "input_tokens": 2463029,
+        "output_tokens": 232080,
+        "cache_hits": 0,
+        "failures": 0,
+        "seconds": 469.6026526050118,
+        "cost_usd": 0.10344721800000062,
+        "priced_responses": 436,
+        "decision_cache_hits": 0,
+        "deadline_exceeded": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 4.927596249995986,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 4.378057458001422,
+            "usage": {
+              "requests": 421,
+              "input_tokens": 2448266,
+              "output_tokens": 230085,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 421,
+              "cost_usd": 0.10282717200000058,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 9.079099982045591e-05,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.5485843750066124,
+            "usage": {
+              "requests": 15,
+              "input_tokens": 14763,
+              "output_tokens": 1995,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 15,
+              "cost_usd": 0.0006200460000000407,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0007719580025877804,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          }
+        }
+      },
+      "prefetch": {
+        "status": "completed",
+        "budget_seconds": 6.5,
+        "context_injected": true,
+        "elapsed_seconds": 4.9279284160002135
+      }
+    },
+    {
+      "iteration": 2,
+      "temperature": "warm",
+      "host_elapsed_seconds": 0.47370108298491687,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_hits": 15,
+        "failures": 0,
+        "seconds": 0.0,
+        "cost_usd": 0.0,
+        "priced_responses": 0,
+        "decision_cache_hits": 13683,
+        "deadline_exceeded": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 0.4733620000188239,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 0.4697849169897381,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 13683,
+              "deadline_exceeded": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 3.604197991080582e-05,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.002800791000481695,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 15,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0006916669954080135,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0,
+              "deadline_exceeded": 0
+            }
+          }
+        }
+      },
+      "prefetch": {
+        "status": "completed",
+        "budget_seconds": 6.5,
+        "context_injected": true,
+        "elapsed_seconds": 0.47361970800557174
+      }
+    }
+  ],
+  "spans": 13683,
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "usage": {
+    "requests": 1308,
+    "input_tokens": 7389125,
+    "output_tokens": 696240,
+    "cache_hits": 45,
+    "failures": 0,
+    "seconds": 1592.3753983460192,
+    "resolved_model": "typesafe/jev-1.13-20260917",
+    "cost_usd": 0.3103432499999975,
+    "priced_responses": 1308,
+    "decision_cache_hits": 41049,
+    "deadline_exceeded": 0
+  },
+  "api_latency_seconds": {
+    "min": 0.4633637910010293,
+    "median": 1.0255975414911518,
+    "max": 4.282662125013303
+  },
+  "all_injected": true,
+  "evidence_status": "development prototype; see wheel hash, not a final-release reliability claim",
+  "source_report_sha256": "cd29c13adac73ed2ac532b06c2253db90121ada9488716ca3de1deddef2f0e2b"
+}

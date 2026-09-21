@@ -1,0 +1,248 @@
+{
+  "single": {
+    "source_report_sha256": "e12e30b0d2be261f9f58eddf676cb1e8688647a66e94e4d3a28c4d8bc9c469b1",
+    "plan": {
+      "scope": "development",
+      "batch_mode": "single",
+      "selected_ids": [
+        "59524333",
+        "8fb83627",
+        "85fa3a3f",
+        "edced276",
+        "8752c811",
+        "c8f1aeed",
+        "d6233ab6",
+        "1c0ddc50",
+        "19b5f2b3_abs",
+        "58bf7951",
+        "gpt4_cd90e484",
+        "gpt4_1916e0ea"
+      ],
+      "dataset_sha256": "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442",
+      "runtime_sha256": "12b80bf8132b7a6d031812020ee66c4a69a220c83efe90eaa1df2da45621cddb",
+      "harness_sha256": "510700ad18215f256618d2923bfb91ccd3dfa1c6b6e27e6d52b8f0cb4ccd6bda",
+      "caller_model": "openai/gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "judge_model": "openai/gpt-4.1",
+      "searches": 3,
+      "records": 20,
+      "context_chars": 120000,
+      "chunk_chars": 6000
+    },
+    "status": "completed",
+    "summary": {
+      "cases": 12,
+      "errors": 0
+    },
+    "jev_usage": {
+      "requests": 9802,
+      "input_tokens": 5324225,
+      "output_tokens": 466344,
+      "cache_hits": 1,
+      "failures": 0,
+      "seconds": 54963.53029475399,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.2236174500000001,
+      "priced_responses": 9802,
+      "decision_cache_hits": 0,
+      "deadline_exceeded": 0
+    },
+    "results": [
+      {
+        "id": "59524333",
+        "kind": "knowledge-update",
+        "correct": true,
+        "seconds": 13.224577415996464
+      },
+      {
+        "id": "8fb83627",
+        "kind": "knowledge-update",
+        "correct": true,
+        "seconds": 20.448774832999334
+      },
+      {
+        "id": "85fa3a3f",
+        "kind": "multi-session",
+        "correct": true,
+        "seconds": 42.44289504198241
+      },
+      {
+        "id": "edced276",
+        "kind": "multi-session",
+        "correct": true,
+        "seconds": 43.18769391599926
+      },
+      {
+        "id": "8752c811",
+        "kind": "single-session-assistant",
+        "correct": true,
+        "seconds": 42.345782582997344
+      },
+      {
+        "id": "c8f1aeed",
+        "kind": "single-session-assistant",
+        "correct": true,
+        "seconds": 43.88269391699578
+      },
+      {
+        "id": "d6233ab6",
+        "kind": "single-session-preference",
+        "correct": true,
+        "seconds": 95.27581250001094
+      },
+      {
+        "id": "1c0ddc50",
+        "kind": "single-session-preference",
+        "correct": true,
+        "seconds": 35.49880237499019
+      },
+      {
+        "id": "19b5f2b3_abs",
+        "kind": "single-session-user",
+        "correct": true,
+        "seconds": 105.09850770898629
+      },
+      {
+        "id": "58bf7951",
+        "kind": "single-session-user",
+        "correct": true,
+        "seconds": 49.92971629099338
+      },
+      {
+        "id": "gpt4_cd90e484",
+        "kind": "temporal-reasoning",
+        "correct": true,
+        "seconds": 17.055781708011637
+      },
+      {
+        "id": "gpt4_1916e0ea",
+        "kind": "temporal-reasoning",
+        "correct": true,
+        "seconds": 43.094523624982685
+      }
+    ]
+  },
+  "question": {
+    "source_report_sha256": "bfdfc44355fd6a8c57354c333ce5ba80a3ba7354e2556fb4a13ccdfaba787c4f",
+    "plan": {
+      "scope": "development",
+      "batch_mode": "question",
+      "selected_ids": [
+        "59524333",
+        "8fb83627",
+        "85fa3a3f",
+        "edced276",
+        "8752c811",
+        "c8f1aeed",
+        "d6233ab6",
+        "1c0ddc50",
+        "19b5f2b3_abs",
+        "58bf7951",
+        "gpt4_cd90e484",
+        "gpt4_1916e0ea"
+      ],
+      "dataset_sha256": "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442",
+      "runtime_sha256": "12b80bf8132b7a6d031812020ee66c4a69a220c83efe90eaa1df2da45621cddb",
+      "harness_sha256": "510700ad18215f256618d2923bfb91ccd3dfa1c6b6e27e6d52b8f0cb4ccd6bda",
+      "caller_model": "openai/gpt-5.6-luna",
+      "reasoning_effort": "high",
+      "judge_model": "openai/gpt-4.1",
+      "searches": 3,
+      "records": 20,
+      "context_chars": 120000,
+      "chunk_chars": 6000
+    },
+    "status": "completed",
+    "summary": {
+      "cases": 12,
+      "errors": 0
+    },
+    "jev_usage": {
+      "requests": 942,
+      "input_tokens": 5390858,
+      "output_tokens": 360233,
+      "cache_hits": 0,
+      "failures": 0,
+      "seconds": 1376.0568702589662,
+      "resolved_model": "typesafe/jev-1.13-20260917",
+      "cost_usd": 0.2264160359999997,
+      "priced_responses": 942,
+      "decision_cache_hits": 0,
+      "deadline_exceeded": 0
+    },
+    "results": [
+      {
+        "id": "59524333",
+        "kind": "knowledge-update",
+        "correct": true,
+        "seconds": 7.891605333978077
+      },
+      {
+        "id": "8fb83627",
+        "kind": "knowledge-update",
+        "correct": true,
+        "seconds": 8.671272166015115
+      },
+      {
+        "id": "85fa3a3f",
+        "kind": "multi-session",
+        "correct": true,
+        "seconds": 7.830565665994072
+      },
+      {
+        "id": "edced276",
+        "kind": "multi-session",
+        "correct": true,
+        "seconds": 9.25775629200507
+      },
+      {
+        "id": "8752c811",
+        "kind": "single-session-assistant",
+        "correct": true,
+        "seconds": 9.264280333998613
+      },
+      {
+        "id": "c8f1aeed",
+        "kind": "single-session-assistant",
+        "correct": true,
+        "seconds": 9.358719915995607
+      },
+      {
+        "id": "d6233ab6",
+        "kind": "single-session-preference",
+        "correct": true,
+        "seconds": 10.89254141697893
+      },
+      {
+        "id": "1c0ddc50",
+        "kind": "single-session-preference",
+        "correct": true,
+        "seconds": 11.499360209010774
+      },
+      {
+        "id": "19b5f2b3_abs",
+        "kind": "single-session-user",
+        "correct": true,
+        "seconds": 12.952392374980263
+      },
+      {
+        "id": "58bf7951",
+        "kind": "single-session-user",
+        "correct": true,
+        "seconds": 5.34324870898854
+      },
+      {
+        "id": "gpt4_cd90e484",
+        "kind": "temporal-reasoning",
+        "correct": true,
+        "seconds": 8.592186333000427
+      },
+      {
+        "id": "gpt4_1916e0ea",
+        "kind": "temporal-reasoning",
+        "correct": true,
+        "seconds": 8.921436917007668
+      }
+    ]
+  }
+}

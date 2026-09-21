@@ -1,0 +1,201 @@
+{
+  "synthetic": true,
+  "records": 10000,
+  "shape": "short",
+  "batch_mode": "question",
+  "workers": 128,
+  "serial_dedup": false,
+  "fixture_sha256": "c5b9f21dfd5e63fc5ffce0d621071d2c7acf9e1d74ee7c2d6468bc59cea2eaa1",
+  "corpus_characters": 539964,
+  "wheel_sha256": "eaa10a2b503b95c4de4179784aeb7e94841b95bea8ac9780c95f4b39e9952d48",
+  "runs": [
+    {
+      "iteration": 0,
+      "temperature": "cold",
+      "host_elapsed_seconds": 3.679558666975936,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 172,
+        "input_tokens": 875434,
+        "output_tokens": 171070,
+        "cache_hits": 0,
+        "failures": 0,
+        "seconds": 216.7800307488069,
+        "cost_usd": 0.03676822799999999,
+        "priced_responses": 172,
+        "decision_cache_hits": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 3.6765548330149613,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 2.947994166985154,
+            "usage": {
+              "requests": 157,
+              "input_tokens": 860660,
+              "output_tokens": 169075,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 157,
+              "cost_usd": 0.036147719999999994,
+              "decision_cache_hits": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 0.00012133299605920911,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.7252166669932194,
+            "usage": {
+              "requests": 15,
+              "input_tokens": 14774,
+              "output_tokens": 1995,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 15,
+              "cost_usd": 0.0006205079999999988,
+              "decision_cache_hits": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.002972874994156882,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "iteration": 0,
+      "temperature": "warm",
+      "host_elapsed_seconds": 0.18637933299760334,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_hits": 15,
+        "failures": 0,
+        "seconds": 0.0,
+        "cost_usd": 0.0,
+        "priced_responses": 0,
+        "decision_cache_hits": 10001
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 10000,
+        "elapsed_seconds": 0.1856498749984894,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 0.1818466249969788,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 10001
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 3.816597745753825e-05,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.003039292001631111,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 15,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0006572499987669289,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          }
+        }
+      }
+    }
+  ],
+  "spans": 10001,
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "usage": {
+    "requests": 172,
+    "input_tokens": 875434,
+    "output_tokens": 171070,
+    "cache_hits": 15,
+    "failures": 0,
+    "seconds": 216.7800307488069,
+    "resolved_model": "typesafe/jev-1.13-20260917",
+    "cost_usd": 0.03676822799999999,
+    "priced_responses": 172,
+    "decision_cache_hits": 10001
+  },
+  "api_latency_seconds": {
+    "min": 0.38141595901106484,
+    "median": 1.1826392499933718,
+    "max": 2.4619365830149036
+  },
+  "all_injected": true,
+  "evidence_status": "development prototype; see wheel hash, not a final-release reliability claim",
+  "source_report_sha256": "a5c63a9baf8c41219704c8f6e5c5710092aeb72b9cef6b8cb1998a22b41a152f"
+}

@@ -2,7 +2,7 @@
 
 The inherited ``mnemosyne`` modules remain a compatibility implementation namespace.
 """
-__version__ = "0.1.0a1"
+__version__ = "0.1.0a2"
 __license__ = "MIT"
 
 

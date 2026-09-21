@@ -2129,8 +2129,38 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
         # Keep every Beam-backed source on the durable provider scope. Some
         # sources run after _prefetch_bank(), so locking only that helper would
         # let scoped replay leak its temporary session into prompt context.
-        with self._ensure_beam_access_lock():
-            return self._prefetch_locked(query, session_id=session_id)
+        from mnemosyne.core import jev
+        budget = _parse_env_float('MNEMOSYNE_PREFETCH_BUDGET_SECONDS', 6.5)
+        if not 0 < budget <= 7:
+            raise ValueError('MNEMOSYNE_PREFETCH_BUDGET_SECONDS must be greater than 0 and at most 7')
+        started = time.monotonic()
+        trace = self._last_prefetch = dict(status='running', budget_seconds=budget)
+        lock = self._ensure_beam_access_lock()
+        # Lock contention counts against the same budget as network decisions.
+        # Returning before Hermes' eight-second join also avoids skipping the
+        # following turn merely because a timed-out worker is still alive.
+        with jev.decision_budget(budget):
+            acquired = lock.acquire(timeout=budget)
+            try:
+                if not acquired:
+                    trace['status'] = 'lock_timeout'
+                    return ''
+                previous = getattr(self._beam, '_last_jev_recall', None)
+                result = self._prefetch_locked(query, session_id=session_id)
+                current = getattr(self._beam, '_last_jev_recall', None)
+                trace['status'] = 'completed' if result else 'empty'
+                if current is not previous and current and current.get('status') == 'failed':
+                    trace['status'] = 'timed_out' if current.get('error_type') == 'JevDeadlineExceeded' else 'failed'
+                    trace['error_type'] = current.get('error_type')
+                trace['context_injected'] = bool(result)
+                return result
+            except jev.JevDeadlineExceeded:
+                trace['status'] = 'timed_out'
+                return ''
+            finally:
+                if acquired:
+                    lock.release()
+                trace['elapsed_seconds'] = time.monotonic() - started
 
     def _prefetch_locked(self, query: str, *, session_id: str = "") -> str:
         """Recall relevant context for injection, driven by the active profile.
@@ -4155,6 +4185,13 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
         with self._ensure_beam_access_lock():
             result = run_diagnostics(**diagnostic_kwargs)
             result["sync_turn"] = self._sync_turn_diagnostics()
+            result['prefetch'] = dict(getattr(self, '_last_prefetch', {}))
+            trace = getattr(self._beam, '_last_jev_recall', {})
+            # Only aggregate timing and usage. Criteria/query/evidence are not
+            # part of a shareable performance diagnostic.
+            result['jev_recall'] = {key: trace[key] for key in (
+                'status', 'scanned', 'elapsed_seconds', 'resolved_model',
+                'stages', 'usage', 'error_type') if key in trace}
 
             active_db = None
             try:

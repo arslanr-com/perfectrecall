@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "files_checked": 519,
+  "known_credential_checked": true,
+  "artifacts_checked": 2,
+  "findings": [],
+  "scope": "Publishable working-tree files and explicitly supplied archives; no guarantee against every possible form of sensitive data"
+}

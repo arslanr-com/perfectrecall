@@ -59,23 +59,29 @@ def rank(query, source, evidence_questions=None):
         return [], 0
     questions = {str(i): {'type':'noul', 'instructions': jev.DATA_RULE + criterion}
                  for i, criterion in enumerate(criteria)}
+    mode = os.environ.get('MNEMOSYNE_JEV_BATCH_MODE', 'question')
+    if mode not in {'single', 'question'}:
+        raise ValueError('MNEMOSYNE_JEV_BATCH_MODE must be single or question')
     def score(span):
         answers = jev.client().evaluate(span, questions)
         return max(a['noul'] for a in answers.values())
     spans = iter((owner, span) for owner, row in enumerate(rows)
                  for span in evidence_spans(row['content']))
     scores = [0.] * len(rows)
+    if mode == 'question':
+        return _rank_question_batches(rows, spans, questions, workers)
     with ThreadPoolExecutor(max_workers=workers) as pool:
         pending = {}
         def fill():
             # Keep at most one outstanding request per worker. Do not eagerly
             # materialize every span/future of a large corpus.
             while len(pending) < workers:
+                jev.check_deadline()
                 try:
                     owner, span = next(spans)
                 except StopIteration:
                     break
-                pending[pool.submit(score, span)] = owner
+                pending[jev.submit(pool, score, span)] = owner
         try:
             fill()
             while pending:
@@ -83,6 +89,71 @@ def rank(query, source, evidence_questions=None):
                 for future in done:
                     owner = pending.pop(future)
                     scores[owner] = max(scores[owner], future.result())
+                fill()
+        except Exception:
+            pool.shutdown(wait=True, cancel_futures=True)
+            raise
+    ranked = [dict(row, score=score, jev_relevance=score, dense_score=0., fts_score=0.)
+              for row, score in zip(rows, scores)]
+    cutoff = jev.threshold('RELEVANCE_THRESHOLD', .5)
+    ranked = [row for row in ranked if row['score'] >= cutoff]
+    ranked.sort(key=lambda row: (-row['score'], row['id']))
+    return ranked, len(rows)
+
+
+def _rank_question_batches(rows, spans, criteria, workers):
+    """Batch independent evidence questions, never a shared memory shortlist."""
+    client = jev.client()
+    scores = [0.] * len(rows)
+
+    def batches():
+        batch, owners = [], []
+        # The counter includes the exact JSON envelope, keys, punctuation and
+        # UTF-8 bytes; non-ASCII evidence obeys the same bound as ASCII evidence.
+        base_bytes = len(jev._json(dict(model=client.model, state={}, questions={})))
+        size = base_bytes
+        for owner, span in spans:
+            jev.check_deadline()
+            for criterion in criteria.values():
+                question = {'type': 'noul', 'instructions': {
+                    'question': criterion['instructions'], 'memory': span}}
+                encoded = len(jev._json(question))
+                if len(jev._json({})) + encoded > client.pair_bytes:
+                    raise jev.JevError('Evidence question exceeds Jev context budget')
+                entry_bytes = len(jev._json(str(len(batch)))) + 1 + encoded + bool(batch)
+                if batch and size + entry_bytes > client.request_bytes:
+                    yield owners, batch
+                    batch, owners, size = [], [], base_bytes
+                    entry_bytes = len(jev._json('0')) + 1 + encoded
+                if size + entry_bytes > client.request_bytes:
+                    raise jev.JevError('Evidence question exceeds Jev request budget')
+                batch.append(question)
+                owners.append(owner)
+                size += entry_bytes
+        if batch:
+            yield owners, batch
+
+    work = iter(batches())
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        pending = {}
+
+        def fill():
+            while len(pending) < workers:
+                jev.check_deadline()
+                try:
+                    owners, batch = next(work)
+                except StopIteration:
+                    break
+                pending[jev.submit(pool, client.evaluate_independent, batch)] = owners
+
+        try:
+            fill()
+            while pending:
+                done, _ = wait(pending, return_when=FIRST_COMPLETED)
+                for future in done:
+                    owners = pending.pop(future)
+                    for owner, answer in zip(owners, future.result()):
+                        scores[owner] = max(scores[owner], answer['noul'])
                 fill()
         except Exception:
             pool.shutdown(wait=True, cancel_futures=True)

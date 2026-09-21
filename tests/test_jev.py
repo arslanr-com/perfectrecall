@@ -90,7 +90,8 @@ def test_batching_long_unicode_and_complete_coverage(monkeypatch):
     texts = ["字" * 19000] + [f"document {i} " * 100 for i in range(80)]
     scores = jev.relevance("query", texts)
     assert scores == [.9] * 81 and len(seen) > 1
-    sent = [q["instructions"]["candidate"] for body in seen for q in body["questions"].values()]
+    sent = [question['instructions']['candidate'] for _, question in sorted(
+        ((int(key), q) for body in seen for key, q in body['questions'].items()))]
     assert "".join(sent) == "".join(texts)
 
 
@@ -126,7 +127,7 @@ def install_fake(monkeypatch, rule=lambda candidate: .95):
                 if isinstance(instruction, str):
                     data["answers"][key]["noul"] = rule(payload["state"])
                     continue
-                score = rule(instruction.get("candidate", ""))
+                score = rule(instruction.get("candidate", instruction.get("memory", "")))
                 if "same substantive claims" in instruction["question"]:
                     score = .01
                 data["answers"][key]["noul"] = score
@@ -137,7 +138,10 @@ def install_fake(monkeypatch, rule=lambda candidate: .95):
     return sent, client
 
 
-def test_full_corpus_no_shortlist_and_scope_before_disclosure(beam, monkeypatch):
+@pytest.mark.parametrize('batch_mode', ['single', 'question'])
+def test_full_corpus_no_shortlist_and_scope_before_disclosure(beam, monkeypatch, batch_mode):
+    monkeypatch.setenv('MNEMOSYNE_JEV_RANKING', 'evidence')
+    monkeypatch.setenv('MNEMOSYNE_JEV_BATCH_MODE', batch_mode)
     ids = [beam.remember(f"ordinary memo {i}", memory_type="fact") for i in range(260)]
     target = beam.remember("A semantically useful needle with no literal query token.", memory_type="fact")
     hidden = beam.remember("hidden needle", memory_type="fact")
@@ -163,6 +167,25 @@ def test_recall_failure_no_partial_reinforcement(beam, monkeypatch):
     with pytest.raises(jev.JevError):
         beam.recall("query")
     assert beam.conn.execute("SELECT recall_count FROM working_memory WHERE id=?", (memory_id,)).fetchone()[0] == 0
+    assert beam._last_jev_recall['status'] == 'failed'
+    assert beam._last_jev_recall['stages']['ranking']['status'] == 'failed'
+    assert beam._last_jev_recall['stages']['ranking']['usage']['failures'] == 1
+
+
+def test_recall_separates_ranking_and_duplicate_costs(beam, monkeypatch):
+    monkeypatch.setenv('MNEMOSYNE_JEV_BATCH_MODE', 'single')
+    for text in ['Cedar uses PostgreSQL.', 'Cedar deploys to Paris.', 'Cedar serves reports.']:
+        beam.remember(text, memory_type='fact')
+    _, client = install_fake(monkeypatch)
+    monkeypatch.setenv('MNEMOSYNE_JEV_RANKING', 'evidence')
+    result = beam.recall('What do we know about Cedar?', top_k=3, explain=True)
+    trace = result['explain']
+    assert trace['status'] == 'completed' and trace['scanned'] == 3
+    assert list(trace['stages']) == ['ranking', 'weighting', 'deduplication', 'finalization']
+    assert trace['stages']['ranking']['usage']['requests'] == 3
+    assert trace['stages']['deduplication']['usage']['requests'] == 2
+    assert trace['usage']['requests'] == client.snapshot()['requests'] == 5
+    assert trace['elapsed_seconds'] >= sum(stage['seconds'] for stage in trace['stages'].values())
 
 
 def test_filter_no_result_zero_limit_and_superseded(beam, monkeypatch):
@@ -334,12 +357,18 @@ def test_compression_preserves_indivisible_evidence(monkeypatch):
     assert jev.compress_extractively(text, 20) == text
 
 
-def test_caller_criteria_are_applied_to_every_memory(monkeypatch):
+@pytest.mark.parametrize('batch_mode', ['single', 'question'])
+def test_caller_criteria_are_applied_to_every_memory(monkeypatch, batch_mode):
+    monkeypatch.setenv('MNEMOSYNE_JEV_BATCH_MODE', batch_mode)
     from mnemosyne.core import jev_evidence
     seen = []
     def transport(payload, timeout):
-        seen.append(payload['state'])
-        return response(payload['questions'], .95 if 'answer' in payload['state'] else .05)
+        data = response(payload['questions'])
+        for key, question in payload['questions'].items():
+            memory = payload['state'] if batch_mode == 'single' else question['instructions']['memory']
+            seen.append(memory)
+            data['answers'][key]['noul'] = .95 if 'answer' in memory else .05
+        return data
     monkeypatch.setattr(jev, 'client', lambda: jev.JevClient('test', transport=transport))
     rows = [dict(id=str(i), content=f'noise {i}') for i in range(10)] + [dict(id='good', content='answer')]
     ranked, count = jev_evidence.rank('question', iter(rows), ['Does it mention the exact answer?'])
@@ -354,18 +383,24 @@ def test_evidence_questions_reject_invalid_input_before_network(questions):
         rank('query', [], questions)
 
 
-def test_evidence_pipeline_scans_visible_spans_and_preserves_rows(beam, monkeypatch):
+@pytest.mark.parametrize('batch_mode', ['single', 'question'])
+def test_evidence_pipeline_scans_visible_spans_and_preserves_rows(beam, monkeypatch, batch_mode):
+    monkeypatch.setenv('MNEMOSYNE_JEV_BATCH_MODE', batch_mode)
     wanted = beam.remember('prefix ' * 600 + 'needle evidence', memory_type='fact')
     hidden = beam.remember('secret foreign evidence', memory_type='fact')
     beam.conn.execute("UPDATE working_memory SET session_id='other' WHERE id=?", (hidden,))
     beam.conn.commit()
     seen = []
     def transport(payload, timeout):
-        seen.append(payload)
-        assert isinstance(payload['state'], str)
-        assert 'secret foreign' not in payload['state']
-        assert all('Does it contain a needle?' in q['instructions'] for q in payload['questions'].values())
-        return response(payload['questions'], .95 if 'needle' in payload['state'] else .01)
+        data = response(payload['questions'])
+        for key, question in payload['questions'].items():
+            memory = payload['state'] if batch_mode == 'single' else question['instructions']['memory']
+            criterion = question['instructions'] if batch_mode == 'single' else question['instructions']['question']
+            seen.append(memory)
+            assert 'secret foreign' not in memory
+            assert 'Does it contain a needle?' in criterion
+            data['answers'][key]['noul'] = .95 if 'needle' in memory else .01
+        return data
     client = jev.JevClient('test', transport=transport)
     monkeypatch.setattr(jev, 'client', lambda: client)
     monkeypatch.setenv('MNEMOSYNE_DECISION_BACKEND', 'jev')
@@ -375,7 +410,7 @@ def test_evidence_pipeline_scans_visible_spans_and_preserves_rows(beam, monkeypa
     assert result['explain']['ranking'] == 'evidence'
     assert result['explain']['scanned'] == 1
     # Request cache can reuse repeated spans, but no source text is truncated.
-    assert any('needle evidence' in p['state'] for p in seen)
+    assert any('needle evidence' in text for text in seen)
 
 
 def test_tool_contract_exposes_caller_questions_in_both_schemas():

@@ -30,7 +30,7 @@ Each history is split identically into 6,000-character memory records. Gold answ
 
 Baseline: original Mnemosyne commit `199d4bc6662bd51c18275331ddeb51ac07387acf`, with API `openai/text-embedding-3-small` and its inherited hybrid ranking. Jev confirmation runtime: `e76571a968f74bab5dabf420da6057cd0ec85b1a`. The public patch reconstructs the latter from upstream and verifies the exact runtime hash. The short-criteria development snapshot is `748bd2329149466d785b21cbd06b2bc76eef5039`.
 
-The release includes the short-criteria guidance plus subsequent packaging, storage, and performance changes. **No table above is a fresh independent evaluation of PerfectRecall 0.1.0a1.**
+The release includes the short-criteria guidance plus subsequent packaging, storage, and performance changes. **No table above is a fresh independent evaluation of the current PerfectRecall release.**
 
 Observed confirmation usage, including retained attempts: Jev 114,724 requests, 114,716 priced responses, approximately $2.69835; caller/judge approximately $0.20718 baseline and $0.29337 Jev. Baseline embedding usage was 369 calls, approximately $0.25721 upstream inference cost (account-billed BYOK cost can differ). Missing priced responses, routing changes, and future pricing mean these are observations, not price guarantees. Do not infer deployment latency from these batched quality runs.
 
@@ -107,6 +107,8 @@ benchmarks/work/venv/bin/python benchmarks/run_isolated.py benchmarks/historical
 Compare with the same `compare_agentic_memory.py` interface. The development dataset hash and selected IDs are in [personamem-freeze.json](results/personamem-freeze.json). The reserved confirmation cases were not used for the reported result.
 
 ## Capacity
+
+**The figures below describe the old per-span runtime.** The 0.1.0a2 work introduces native question batching and parallel post-processing. Its development runs delivered context on 10,000 mixed-length records in 4.93–5.96 seconds; see [current performance measurements](../docs/PERFORMANCE.md). Historical failures remain below for comparison.
 
 Cold automatic prefetch on 1,024 synthetic short memories, three runs per concurrency setting:
 

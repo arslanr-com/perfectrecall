@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "live_api": false,
+  "transport": "stdio",
+  "tool_count": 29,
+  "stored_record_read": true,
+  "legacy_tool_names": true,
+  "atomic_criteria_description": true,
+  "wheel_sha256": "b7e80fce81b4bb9ac1399572fd0cad96ca93823d21ba00c64933ded712bdc095"
+}

@@ -45,14 +45,11 @@ assert PerfectRecall is Mnemosyne
 assert jev.enabled()
 assert os.environ['MNEMOSYNE_WRITE_CLASSIFIER']=='off'
 assert str(DEFAULT_PERSONA_FILE)==os.environ['MNEMOSYNE_PERSONA_FILE']
-class FakeJev:
-    def __init__(self): self.sent=[]
-    def snapshot(self):
-        return dict(requests=len(self.sent),input_tokens=0,output_tokens=0,cache_hits=0,resolved_model='test')
-    def evaluate(self,state,questions,**kwargs):
-        self.sent.append(state)
-        return {key:dict(type='noul',noul=.99) for key in questions}
-client=FakeJev()
+sent=[]
+def transport(payload, timeout):
+    sent.append(payload)
+    return dict(model='test', answers={key:dict(type='noul',noul=.99) for key in payload['questions']}, usage={})
+client=jev.JevClient('test', transport=transport)
 jev.client=lambda:client
 items=[]
 for old in json.loads(os.environ['TEST_EXISTING_MEMORIES']):
@@ -62,7 +59,7 @@ for old in json.loads(os.environ['TEST_EXISTING_MEMORIES']):
     items.append(dict(bank=old['bank'],id=old['id'],path=str(mem.db_path),content=mem.get(old['id'])['content']))
     mem.beam.conn.close()
     mem.conn.close()
-assert client.sent
+assert sent
 print(json.dumps(items))
 ''', env)
     assert after == before

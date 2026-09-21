@@ -1,0 +1,203 @@
+{
+  "synthetic": true,
+  "records": 241,
+  "shape": "short",
+  "batch_mode": "single",
+  "workers": 128,
+  "serial_dedup": true,
+  "fixture_sha256": "57ddf9fb196657a7b9b14ec5b5882506d53378ee9da5da796201d81501c78378",
+  "corpus_characters": 12978,
+  "wheel_sha256": "eaa10a2b503b95c4de4179784aeb7e94841b95bea8ac9780c95f4b39e9952d48",
+  "runs": [
+    {
+      "iteration": 0,
+      "temperature": "cold",
+      "host_elapsed_seconds": 8.005377291992772,
+      "context_injected": false,
+      "cedar_context": false,
+      "unrelated_context": false,
+      "worker_alive_at_return": true,
+      "immediate_followup_seconds": 7.925002137199044e-05,
+      "immediate_followup_empty": true,
+      "usage": {
+        "requests": 257,
+        "input_tokens": 94019,
+        "output_tokens": 6835,
+        "cache_hits": 0,
+        "failures": 0,
+        "seconds": 222.96674119285308,
+        "cost_usd": 0.00394879800000001,
+        "priced_responses": 257,
+        "decision_cache_hits": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 241,
+        "elapsed_seconds": 8.902724250016036,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 2.4028995000116993,
+            "usage": {
+              "requests": 242,
+              "input_tokens": 79291,
+              "output_tokens": 4840,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 242,
+              "cost_usd": 0.00333022200000001,
+              "decision_cache_hits": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 0.00012633399455808103,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 6.497319291986059,
+            "usage": {
+              "requests": 15,
+              "input_tokens": 14728,
+              "output_tokens": 1995,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 15,
+              "cost_usd": 0.0006185760000000005,
+              "decision_cache_hits": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.0021640420018229634,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "iteration": 0,
+      "temperature": "warm",
+      "host_elapsed_seconds": 0.02178808400640264,
+      "context_injected": true,
+      "cedar_context": true,
+      "unrelated_context": false,
+      "worker_alive_at_return": false,
+      "usage": {
+        "requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_hits": 257,
+        "failures": 0,
+        "seconds": 0.0,
+        "cost_usd": 0.0,
+        "priced_responses": 0,
+        "decision_cache_hits": 0
+      },
+      "recall": {
+        "status": "completed",
+        "scanned": 241,
+        "elapsed_seconds": 0.021195125009398907,
+        "stages": {
+          "ranking": {
+            "status": "completed",
+            "seconds": 0.01700408401666209,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 242,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          },
+          "weighting": {
+            "status": "completed",
+            "seconds": 4.0207989513874054e-05,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          },
+          "deduplication": {
+            "status": "completed",
+            "seconds": 0.003316040994832292,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 15,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          },
+          "finalization": {
+            "status": "completed",
+            "seconds": 0.000755416986066848,
+            "usage": {
+              "requests": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "cache_hits": 0,
+              "failures": 0,
+              "priced_responses": 0,
+              "cost_usd": 0.0,
+              "decision_cache_hits": 0
+            }
+          }
+        }
+      }
+    }
+  ],
+  "spans": 242,
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "usage": {
+    "requests": 257,
+    "input_tokens": 94019,
+    "output_tokens": 6835,
+    "cache_hits": 257,
+    "failures": 0,
+    "seconds": 222.96674119285308,
+    "resolved_model": "typesafe/jev-1.13-20260917",
+    "cost_usd": 0.00394879800000001,
+    "priced_responses": 257,
+    "decision_cache_hits": 0
+  },
+  "api_latency_seconds": {
+    "min": 0.3449763329990674,
+    "median": 0.9265252919867635,
+    "max": 1.4461343330040108
+  },
+  "all_injected": false,
+  "evidence_status": "development prototype; see wheel hash, not a final-release reliability claim",
+  "source_report_sha256": "1046e44e3299eea5c78a4d8e3d1e0789a9968ba2814944f6d41833a8b9432e02"
+}

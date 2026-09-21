@@ -6,6 +6,13 @@ import pytest
 from mnemosyne.core import jev, jev_evidence
 
 
+@pytest.fixture(autouse=True)
+def single_span_format(monkeypatch):
+    # These tests pin the retained one-span/request scheduling contract.
+    # Native batches and their complete coverage are tested separately.
+    monkeypatch.setenv('MNEMOSYNE_JEV_BATCH_MODE', 'single')
+
+
 @pytest.mark.parametrize('raw', ['0', '-1', '257', 'many', '2.5', ''])
 def test_invalid_concurrency_fails_before_evaluating(monkeypatch, raw):
     monkeypatch.setenv('MNEMOSYNE_JEV_WORKERS', raw)

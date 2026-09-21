@@ -12,10 +12,14 @@ import os
 import random
 import threading
 import time
+import weakref
 from collections import OrderedDict
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from contextlib import contextmanager
+from contextvars import ContextVar, copy_context
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
-from functools import lru_cache
+from functools import lru_cache, partial
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -23,6 +27,38 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 class JevError(RuntimeError):
     """An explicit decision could not be obtained; never means 'irrelevant'."""
+
+
+class JevDeadlineExceeded(JevError):
+    """The caller's decision budget elapsed, separately from an API failure."""
+
+
+_deadline = ContextVar('perfectrecall_jev_deadline', default=None)
+_usage_scopes = ContextVar('perfectrecall_jev_usage', default=())
+
+
+@contextmanager
+def decision_budget(seconds):
+    if not math.isfinite(seconds) or seconds <= 0:
+        raise ValueError('Jev decision budget must be finite and positive')
+    until = time.monotonic() + seconds
+    inherited = _deadline.get()
+    token = _deadline.set(min(until, inherited) if inherited is not None else until)
+    try:
+        yield
+    finally:
+        _deadline.reset(token)
+
+
+def check_deadline():
+    until = _deadline.get()
+    if until is not None and time.monotonic() >= until:
+        raise JevDeadlineExceeded('Jev decision budget exceeded')
+
+
+def submit(pool, function, *args):
+    """Carry the provider's budget and profile context into each worker."""
+    return pool.submit(copy_context().run, function, *args)
 
 
 def enabled() -> bool:
@@ -53,7 +89,8 @@ class JevClient:
     request_bytes = 48000
 
     def __init__(self, api_key: str, model=None, base_url=None,
-                 timeout=30.0, retries=2, cache_size=1024, transport=None, *, provider="openrouter"):
+                 timeout=30.0, retries=2, cache_size=1024, transport=None, *, provider="openrouter",
+                 decision_cache_size=65536):
         if provider not in {"openrouter", "typesafe"}:
             raise ValueError("Jev provider must be openrouter or typesafe")
         default_model, default_url, suffix, key_env = PROVIDERS[provider]
@@ -64,31 +101,92 @@ class JevClient:
             raise ValueError("Jev base URL must be HTTPS without credentials, query or fragment")
         if not api_key or not api_key.strip():
             raise JevError(f"Set {key_env} to enable Jev decisions")
-        if not math.isfinite(timeout) or timeout <= 0 or retries < 0 or cache_size < 0:
+        if not math.isfinite(timeout) or timeout <= 0 or retries < 0 or cache_size < 0 or decision_cache_size < 0:
             raise ValueError("Invalid Jev timeout, retry or cache setting")
         self.api_key, self.model, self.provider = api_key.strip(), model, provider
         self.url = base_url.rstrip("/") + suffix
         self.request_bytes = 24000 if provider == "openrouter" else 48000
         self.timeout, self.retries, self.cache_size = timeout, retries, cache_size
         self._transport = transport or self._post
+        self.http_transport = os.environ.get('MNEMOSYNE_JEV_HTTP_TRANSPORT', 'pooled')
+        if self.http_transport not in {'urllib', 'pooled'}:
+            raise ValueError('MNEMOSYNE_JEV_HTTP_TRANSPORT must be urllib or pooled')
+        self._http = None
         self._cache = OrderedDict()
+        self._decision_cache = OrderedDict()
+        self.decision_cache_size = decision_cache_size
         self._lock = threading.Lock()
         self.metrics = dict(requests=0, input_tokens=0, output_tokens=0, cache_hits=0,
                             failures=0, seconds=0.0, resolved_model=None, cost_usd=0.0,
-                            priced_responses=0)
+                            priced_responses=0, decision_cache_hits=0, deadline_exceeded=0)
 
     def snapshot(self):
         with self._lock:
             return dict(self.metrics)
 
+    @contextmanager
+    def usage_scope(self):
+        """Count only this operation and its propagated workers, not other calls."""
+        counters = {key: 0 for key, value in self.metrics.items() if isinstance(value, (int, float))}
+        token = _usage_scopes.set((*_usage_scopes.get(), (self, counters)))
+        try:
+            yield counters
+        finally:
+            _usage_scopes.reset(token)
+
+    def _record_locked(self, **increments):
+        # The caller holds this client's lock; inherited scope dictionaries are
+        # shared by its workers, so both aggregate and scoped updates are atomic.
+        targets = [self.metrics, *(counters for client, counters in _usage_scopes.get() if client is self)]
+        for target in targets:
+            for key, value in increments.items():
+                target[key] += value
+
     def _post(self, payload, timeout):
+        if self.http_transport == 'pooled':
+            return self._post_pooled(payload, timeout)
         request = Request(self.url, data=_json(payload), headers={
             "Authorization": "Bearer " + self.api_key, "Content-Type": "application/json",
         }, method="POST")
         with build_opener(_NoRedirects()).open(request, timeout=timeout) as response:
             return json.loads(response.read(4_000_001))
 
+    def _post_pooled(self, payload, timeout):
+        """Reuse verified HTTPS connections; never follow credential redirects."""
+        import httpx
+        with self._lock:
+            if self._http is None:
+                self._http = httpx.Client(follow_redirects=False, limits=httpx.Limits(
+                    max_connections=256, max_keepalive_connections=128, keepalive_expiry=20))
+                self._http_finalizer = weakref.finalize(self, self._http.close)
+        try:
+            check_deadline()
+            inherited = _deadline.get()
+            if inherited is not None:
+                timeout = min(timeout, max(.001, inherited - time.monotonic()))
+            with self._http.stream('POST', self.url, content=_json(payload), headers={
+                'Authorization': 'Bearer ' + self.api_key, 'Content-Type': 'application/json',
+            }, timeout=timeout) as response:
+                if not 200 <= response.status_code < 300:
+                    raise HTTPError(self.url, response.status_code, 'Jev HTTP error', response.headers, None)
+                body = bytearray()
+                for chunk in response.iter_bytes():
+                    check_deadline()
+                    body.extend(chunk)
+                    if len(body) > 4_000_000:
+                        raise JevError('Jev response exceeds size limit')
+                return json.loads(body)
+        except httpx.TimeoutException:
+            raise TimeoutError('Jev HTTP timeout') from None
+        except httpx.TransportError:
+            raise URLError('Jev connection failed') from None
+
+    def close(self):
+        if self._http is not None:
+            self._http_finalizer()
+
     def evaluate(self, state, questions, *, deadline=None):
+        check_deadline()
         if not questions:
             return {}
         body = dict(model=self.model, state=state, questions=questions)
@@ -99,38 +197,44 @@ class JevClient:
         key = hashlib.sha256(_json(body)).digest()
         with self._lock:
             if key in self._cache:
-                self.metrics["cache_hits"] += 1
+                self._record_locked(cache_hits=1)
                 self._cache.move_to_end(key)
                 return json.loads(self._cache[key])
         started = time.monotonic()
         # Bound the whole operation, including retry sleeps.
         deadline = min(deadline, started + self.timeout) if deadline is not None else started + self.timeout
+        inherited = _deadline.get()
+        if inherited is not None:
+            deadline = min(deadline, inherited)
         if not math.isfinite(deadline):
             raise JevError("Invalid Jev deadline")
         try:
             for attempt in range(self.retries + 1):
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
-                    raise JevError("Jev deadline exceeded")
+                    raise JevDeadlineExceeded("Jev deadline exceeded")
                 try:
                     with self._lock:
-                        self.metrics["requests"] += 1
+                        self._record_locked(requests=1)
                     data = self._transport(body, remaining)
                     answers = self._validate(data, questions)
                     usage = data.get("usage", {})
                     with self._lock:
                         self.metrics["resolved_model"] = data["model"]
                         for field in ("input_tokens", "output_tokens"):
-                            self.metrics[field] += usage.get(field, 0)
+                            self._record_locked(**{field: usage.get(field, 0)})
                         if "cost" in usage:
-                            self.metrics["cost_usd"] += usage["cost"]
-                            self.metrics["priced_responses"] += 1
+                            self._record_locked(cost_usd=usage["cost"], priced_responses=1)
+                        if time.monotonic() >= deadline:
+                            raise JevDeadlineExceeded('Jev response arrived after the decision deadline')
                         if self.cache_size:
                             self._cache[key] = _json(answers).decode()
                             while len(self._cache) > self.cache_size:
                                 self._cache.popitem(last=False)
                     return answers
                 except (HTTPError, URLError, TimeoutError) as exc:
+                    if time.monotonic() >= deadline:
+                        raise JevDeadlineExceeded('Jev deadline exceeded during transport') from None
                     retryable = not isinstance(exc, HTTPError) or exc.code in {408, 429, 500, 502, 503, 504, 529}
                     if not retryable or attempt == self.retries:
                         raise JevError("Jev transport failed" + (f" (HTTP {exc.code})" if isinstance(exc, HTTPError) else "")) from None
@@ -145,17 +249,17 @@ class JevClient:
                             except (ValueError, TypeError, OverflowError):
                                 pass
                     if not math.isfinite(delay) or time.monotonic() + delay >= deadline:
-                        raise JevError("Jev retry would exceed deadline") from None
+                        raise JevDeadlineExceeded("Jev retry would exceed deadline") from None
                     time.sleep(delay)
         except Exception as exc:
             with self._lock:
-                self.metrics["failures"] += 1
+                self._record_locked(**{"deadline_exceeded" if isinstance(exc, JevDeadlineExceeded) else "failures": 1})
             if isinstance(exc, JevError):
                 raise
             raise JevError("Invalid Jev response or transport failure") from None
         finally:
             with self._lock:
-                self.metrics["seconds"] += time.monotonic() - started
+                self._record_locked(seconds=time.monotonic() - started)
 
     @staticmethod
     def _validate(data, questions):
@@ -193,16 +297,76 @@ class JevClient:
         return answers
 
     def fanout(self, state, questions, *, deadline=None):
-        """Pack independent questions; never truncate or omit a candidate."""
-        batch, result = {}, {}
-        for key, question in questions.items():
-            candidate = {**batch, key: question}
-            if len(_json(dict(model=self.model, state=state, questions=candidate))) > self.request_bytes:
-                result.update(self.evaluate(state, batch, deadline=deadline))
-                batch = {}
-            batch[key] = question
-        result.update(self.evaluate(state, batch, deadline=deadline))
-        return result
+        """Pack the original questions and overlap bounded independent batches."""
+        from .jev_evidence import worker_count
+        def batches():
+            base = len(_json(dict(model=self.model, state=state, questions={})))
+            batch, size = {}, base
+            for key, question in questions.items():
+                check_deadline()
+                entry = len(_json(key)) + 1 + len(_json(question))
+                if batch and size + entry + 1 > self.request_bytes:
+                    yield batch
+                    batch, size = {}, base
+                size += entry + bool(batch)
+                batch[key] = question
+            if batch:
+                yield batch
+        work, result = iter(batches()), {}
+        workers = worker_count()
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            pending = set()
+            def fill():
+                while len(pending) < workers:
+                    check_deadline()
+                    try:
+                        batch = next(work)
+                    except StopIteration:
+                        break
+                    pending.add(submit(pool, partial(self.evaluate, deadline=deadline), state, batch))
+            try:
+                fill()
+                while pending:
+                    done, pending = wait(pending, return_when=FIRST_COMPLETED)
+                    for future in done:
+                        result.update(future.result())
+                    fill()
+            except Exception:
+                pool.shutdown(wait=True, cancel_futures=True)
+                raise
+        return {key: result[key] for key in questions}
+
+    def evaluate_independent(self, questions, *, deadline=None):
+        """Evaluate question-local evidence with cache keys independent of packing.
+
+        Each question contains its own complete evidence and decision criterion.
+        The shared state is empty: unrelated memories are never added to another
+        question's evidence. Callers must pack within the normal byte budgets.
+        """
+        check_deadline()
+        output = [None] * len(questions)
+        pending, owners = {}, {}
+        with self._lock:
+            for index, question in enumerate(questions):
+                key = hashlib.sha256(_json(question)).digest()
+                if key in self._decision_cache:
+                    output[index] = json.loads(self._decision_cache[key])
+                    self._decision_cache.move_to_end(key)
+                    self._record_locked(decision_cache_hits=1)
+                else:
+                    pending[str(index)] = question
+                    owners[str(index)] = key
+        if pending:
+            answers = self.evaluate({}, pending, deadline=deadline)
+            with self._lock:
+                for index, answer in answers.items():
+                    output[int(index)] = answer
+                    if self.decision_cache_size:
+                        self._decision_cache[owners[index]] = _json(answer).decode()
+                        self._decision_cache.move_to_end(owners[index])
+                        while len(self._decision_cache) > self.decision_cache_size:
+                            self._decision_cache.popitem(last=False)
+        return output
 
 
 PROVIDERS = {

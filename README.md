@@ -61,7 +61,9 @@ The tool description teaches the calling agent to ask up to three short, concret
 
 SQLite remains local. **Eligible memory text and queries are sent to the configured Jev API** for decisions. Optional Hermes-assisted consolidation can also use the host's language model. This is not an offline or zero-cloud memory system. Keep credentials outside the repository. [Privacy and security](SECURITY.md).
 
-Recall scans the full eligible corpus, so cost and latency grow with text volume. The default is 128 concurrent Jev requests, configurable with `PERFECTRECALL_JEV_WORKERS` from 1 to 256. Increasing concurrency can increase failures and latency. The measured 10,000-record cold scan did **not** fit Hermes' eight-second prefetch window; this release does not promise automatic context at that scale. Explicit recalls can also fail when a decision request fails. [Capacity evidence](benchmarks/README.md#capacity).
+Recall scans the full eligible corpus using native Jev question batches, pooled HTTPS connections, and parallel duplicate checks. In the performance development run, **10,000 mixed-length records completed in 4.93–5.96 seconds cold and 0.47–0.50 seconds warm**, including Hermes context injection. All three cold runs evaluated 13,683 evidence spans. These are synthetic observations, not a latency guarantee for arbitrary memories or network conditions. [Measurements and reproduction](docs/PERFORMANCE.md).
+
+The default remains 128 concurrent requests, configurable with `PERFECTRECALL_JEV_WORKERS` from 1 to 256. Batching reduces network round trips; raising thread count alone did not solve the original problem. Prefetch has a 6.5-second cooperative decision budget to leave cleanup time before Hermes' eight-second window. Required decision failures are reported as failures, never as a successful partial scan. Cost and latency still grow with text volume.
 
 PerfectRecall is an alpha release. The name describes the goal; it is not a guarantee of perfect memory. Model availability, routing, prices, and results can change.
 

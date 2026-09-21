@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "live_api": false,
+  "wheel_sha256": "b7e80fce81b4bb9ac1399572fd0cad96ca93823d21ba00c64933ded712bdc095",
+  "host_timeout_seconds": 8.0,
+  "failed_prefetch_seconds": 0.15581591697991826,
+  "failed_prefetch": {
+    "status": "timed_out",
+    "budget_seconds": 0.15,
+    "error_type": "JevDeadlineExceeded",
+    "context_injected": false,
+    "elapsed_seconds": 0.15571279099094681
+  },
+  "immediate_followup_injected": true,
+  "lingering_worker": false,
+  "usage": {
+    "requests": 2,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_hits": 0,
+    "failures": 0,
+    "seconds": 0.15048866599681787,
+    "resolved_model": "test-double",
+    "cost_usd": 0.0,
+    "priced_responses": 0,
+    "decision_cache_hits": 0,
+    "deadline_exceeded": 1
+  }
+}

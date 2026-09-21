@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "live_api": false,
+  "manual_memory_tool_calls": 0,
+  "initial_records": 10000,
+  "final_records": 10000,
+  "timings": {
+    "sync_dispatch_seconds": 0.00023970901384018362,
+    "sync_completed_seconds": 0.04884029200184159,
+    "reopened_prefetch_seconds": 0.6091581249784213,
+    "three_criteria_cold_seconds": 1.0496351670008153,
+    "three_criteria_cold_requests": 1074,
+    "three_criteria_warm_seconds": 0.7095064590102993,
+    "three_criteria_warm_requests": 0
+  },
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "wheel_sha256": "b7e80fce81b4bb9ac1399572fd0cad96ca93823d21ba00c64933ded712bdc095",
+  "checks": {
+    "empty_profile": true,
+    "entrypoint_discovered": true,
+    "actual_host_abc": true,
+    "automatic_capture": true,
+    "assistant_excluded": true,
+    "reopened_prefetch": true
+  },
+  "usage": {
+    "requests": 1517,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_hits": 4,
+    "failures": 0,
+    "seconds": 0.050275920948479325,
+    "resolved_model": "test-double",
+    "cost_usd": 0.0,
+    "priced_responses": 0,
+    "decision_cache_hits": 41049,
+    "deadline_exceeded": 0
+  }
+}

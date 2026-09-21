@@ -45,11 +45,10 @@ class BlockVectors(importlib.abc.MetaPathFinder):
 sys.meta_path.insert(0,BlockVectors())
 from perfectrecall import PerfectRecall
 from mnemosyne.core import jev
-class FakeJev:
-    def snapshot(self): return dict(requests=0,input_tokens=0,output_tokens=0,cache_hits=0,resolved_model='fixture')
-    def evaluate(self,state,questions,**kwargs):return {k:dict(type='noul',noul=.95) for k in questions}
-    fanout=evaluate
-jev.client=lambda:FakeJev()
+def transport(payload, timeout):
+    return dict(model='test', answers={key:dict(type='noul',noul=.95) for key in payload['questions']}, usage={})
+client=jev.JevClient('test', transport=transport)
+jev.client=lambda:client
 for old in json.loads(os.environ['FIXTURE_DATA']):
     m=PerfectRecall(session_id='existing-session',bank=old['bank'])
     assert str(m.db_path)==old['path']

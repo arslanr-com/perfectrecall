@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "banks": 2,
+  "legacy_vector_tables_preserved": true,
+  "blocked_vector_imports": true,
+  "backup_restore": true
+}

@@ -34,7 +34,7 @@ Existing `from mnemosyne import Mnemosyne` imports and `mnemosyne_*` tool calls 
 
 Provider configuration reads `memory.perfectrecall` first, then `memory.mnemosyne`. Existing scope and profile-isolation choices are retained. Configure `sync_roles: [user, assistant]` only if you want automatic assistant-message capture. An empty list disables automatic conversation capture while explicit memory tools remain usable.
 
-`PERFECTRECALL_JEV_WORKERS` defaults to 128; accepted values are 1–256. More workers are not guaranteed to improve latency. Provider credentials, endpoint, and model resolution are reported without the key by `python -m perfectrecall jev-status`.
+`PERFECTRECALL_JEV_WORKERS` defaults to 128; accepted values are 1–256. More workers are not guaranteed to improve latency. Native question batching and pooled HTTPS are enabled by default; see [performance settings and measurements](PERFORMANCE.md). Provider credentials, endpoint, and model resolution are reported without the key by `python -m perfectrecall jev-status`.
 
 ## Rollback
 
@@ -46,7 +46,7 @@ Stop Hermes. Restore the backed-up `config.yaml` and move the saved legacy plugi
 python -m perfectrecall --version
 python -m perfectrecall jev-status
 python scripts/verify_hermes.py --hermes-root /path/to/hermes-agent \
-  --wheel dist/perfectrecall-0.1.0a1-py3-none-any.whl --output benchmarks/runs/hermes.json
+  --wheel dist/perfectrecall-0.1.0a2-py3-none-any.whl --output benchmarks/runs/hermes.json
 ```
 
 The last command runs against Hermes' real loader and manager in a temporary profile. Add `--live` for bounded paid Jev requests with `OPENROUTER_API_KEY`. It checks automatic user capture and memory injection after reopening, without any manual memory tool call. It does not simulate a full interactive agent conversation.

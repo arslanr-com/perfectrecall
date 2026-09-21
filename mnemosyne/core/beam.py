@@ -3551,8 +3551,11 @@ class BeamMemory:
                 datetime.now(timezone.utc) - timedelta(hours=WORKING_MEMORY_TTL_HOURS)
             ).isoformat()
         )
+        # datetime() normalizes timezone forms but truncates fractional seconds.
+        # Break ties by precise time and insertion order so a write at capacity
+        # cannot immediately evict itself among records from the same second.
         self.conn.execute(
-            f"\n            DELETE FROM working_memory\n            WHERE session_id = ?\n              AND consolidated_at IS NULL\n              AND (pinned IS NULL OR pinned = 0)\n              AND (\n                {_SQL_CHRONO_TS} < ? OR\n                id NOT IN (\n                    SELECT id FROM working_memory\n                    WHERE session_id = ? AND consolidated_at IS NULL\n                      AND (pinned IS NULL OR pinned = 0)\n                    ORDER BY {_SQL_CHRONO_TS} DESC\n                    LIMIT ?\n                )\n              )\n        ",
+            f"\n            DELETE FROM working_memory\n            WHERE session_id = ?\n              AND consolidated_at IS NULL\n              AND (pinned IS NULL OR pinned = 0)\n              AND (\n                {_SQL_CHRONO_TS} < ? OR\n                id NOT IN (\n                    SELECT id FROM working_memory\n                    WHERE session_id = ? AND consolidated_at IS NULL\n                      AND (pinned IS NULL OR pinned = 0)\n                    ORDER BY {_SQL_CHRONO_TS} DESC, julianday(timestamp) DESC, rowid DESC\n                    LIMIT ?\n                )\n              )\n        ",
             (self.session_id, cutoff, self.session_id, WORKING_MEMORY_MAX_ITEMS),
         )
         self.conn.commit()
