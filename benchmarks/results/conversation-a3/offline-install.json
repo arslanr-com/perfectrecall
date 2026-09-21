@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "python": "3.13.12",
+  "isolated_mode": true,
+  "installed_packages": {
+    "pip": "25.3",
+    "httpcore": "1.0.9",
+    "h11": "0.16.0",
+    "PyYAML": "6.0.3",
+    "certifi": "2026.7.22",
+    "httpx": "0.28.1",
+    "typing_extensions": "4.16.0",
+    "anyio": "4.15.1",
+    "perfectrecall": "0.1.0a3",
+    "idna": "3.20"
+  },
+  "checks": {
+    "no_previous_memory_provider": true,
+    "no_vector_dependencies": true,
+    "module_cli": true,
+    "first_provider_installer": true,
+    "legacy_default_data_path": true
+  }
+}

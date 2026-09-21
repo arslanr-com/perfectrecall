@@ -1,0 +1,408 @@
+{
+  "synthetic": true,
+  "live_api": true,
+  "wheel_sha256": "753e7f0fab535f7f8c7d38b384af11f5d18d930217114f10889f26082ea6bb27",
+  "probe_sha256": "a004e34a48ea1272f2fb66df1cb25bff6fcd3917bf41ec4d663de887faf51f6b",
+  "cases": [
+    {
+      "query": "Show that information as a table.",
+      "expected_reuse": true,
+      "reused": true,
+      "trace": {
+        "action": "reuse_question",
+        "reason": "same_evidence",
+        "gate_score": 0.91,
+        "new_evidence_score": 0.12,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 540,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.5919887500058394,
+          "cost_usd": 2.268e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.5920759580039885
+      }
+    },
+    {
+      "query": "Translate the database fact into French.",
+      "expected_reuse": true,
+      "reused": true,
+      "trace": {
+        "action": "reuse_question",
+        "reason": "same_evidence",
+        "gate_score": 0.89,
+        "new_evidence_score": 0.13,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 540,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.30489054101053625,
+          "cost_usd": 2.268e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.30512008300866
+      }
+    },
+    {
+      "query": "Give me a shorter version of the same fact.",
+      "expected_reuse": true,
+      "reused": true,
+      "trace": {
+        "action": "reuse_question",
+        "reason": "same_evidence",
+        "gate_score": 0.91,
+        "new_evidence_score": 0.11,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 543,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.41498020800645463,
+          "cost_usd": 2.2806e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.4151284169929568
+      }
+    },
+    {
+      "query": "Thanks for the information about the Cedar database.",
+      "expected_reuse": true,
+      "reused": true,
+      "trace": {
+        "action": "reuse_question",
+        "reason": "same_evidence",
+        "gate_score": 0.9,
+        "new_evidence_score": 0.11,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 542,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.30719849999877624,
+          "cost_usd": 2.2764e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.30732404100126587
+      }
+    },
+    {
+      "query": "Use that fact in a sentence for the README.",
+      "expected_reuse": true,
+      "reused": true,
+      "trace": {
+        "action": "reuse_question",
+        "reason": "same_evidence",
+        "gate_score": 0.9,
+        "new_evidence_score": 0.12,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 543,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.29121795800165273,
+          "cost_usd": 2.2806e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.29138062498532236
+      }
+    },
+    {
+      "query": "Which PostgreSQL version does Cedar use?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.86,
+        "new_evidence_score": 0.81,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 542,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.2667236249835696,
+          "cost_usd": 2.2764e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.26690333301667124
+      }
+    },
+    {
+      "query": "Who decided to use that database?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.79,
+        "new_evidence_score": 0.83,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 540,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.36328458299976774,
+          "cost_usd": 2.268e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.36341479199472815
+      }
+    },
+    {
+      "query": "Was Cedar previously on MySQL?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.87,
+        "new_evidence_score": 0.85,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 540,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.41157837500213645,
+          "cost_usd": 2.268e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.4118116250028834
+      }
+    },
+    {
+      "query": "Which database does Project Birch use?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.08,
+        "new_evidence_score": 0.88,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 540,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.6811615000187885,
+          "cost_usd": 2.268e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.6814301249978598
+      }
+    },
+    {
+      "query": "Compare Cedar and Birch database choices.",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.71,
+        "new_evidence_score": 0.84,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 540,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.30237779099843465,
+          "cost_usd": 2.268e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.30258120800135657
+      }
+    },
+    {
+      "query": "Check our memory again to verify this.",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.85,
+        "new_evidence_score": 0.85,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 541,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.3457957089995034,
+          "cost_usd": 2.2722e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.34600412502186373
+      }
+    },
+    {
+      "query": "That is outdated. Cedar moved to MariaDB.",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.87,
+        "new_evidence_score": 0.79,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 543,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.26696837501367554,
+          "cost_usd": 2.2806e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.2671399160171859
+      }
+    },
+    {
+      "query": "What else do you remember about Cedar?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.78,
+        "new_evidence_score": 0.71,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 541,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.2652057910163421,
+          "cost_usd": 2.2722e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.26544845799799077
+      }
+    },
+    {
+      "query": "When did we migrate to that database?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.87,
+        "new_evidence_score": 0.86,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 541,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.387899292021757,
+          "cost_usd": 2.2722e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.38810349997947924
+      }
+    },
+    {
+      "query": "Where are its backups stored?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.7,
+        "new_evidence_score": 0.81,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 539,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.2878820000041742,
+          "cost_usd": 2.2638e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.288039791979827
+      }
+    },
+    {
+      "query": "What did I say about database licensing costs?",
+      "expected_reuse": false,
+      "reused": false,
+      "trace": {
+        "action": "full_search",
+        "reason": "new_evidence_needed",
+        "gate_score": 0.23,
+        "new_evidence_score": 0.85,
+        "gate_usage": {
+          "requests": 1,
+          "input_tokens": 542,
+          "output_tokens": 37,
+          "cache_hits": 0,
+          "failures": 0,
+          "seconds": 0.32790541599388234,
+          "cost_usd": 2.2764e-05,
+          "priced_responses": 1,
+          "decision_cache_hits": 0,
+          "deadline_exceeded": 0
+        },
+        "gate_seconds": 0.3281461249862332
+      }
+    }
+  ],
+  "false_reuses": 0,
+  "missed_savings": 0,
+  "usage": {
+    "requests": 16,
+    "input_tokens": 8657,
+    "output_tokens": 592,
+    "cache_hits": 0,
+    "failures": 0,
+    "seconds": 5.817058414075291,
+    "resolved_model": "typesafe/jev-1.13-20260917",
+    "cost_usd": 0.0003635939999999999,
+    "priced_responses": 16,
+    "decision_cache_hits": 0,
+    "deadline_exceeded": 0
+  },
+  "status": "passed"
+}

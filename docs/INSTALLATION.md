@@ -50,3 +50,18 @@ python scripts/verify_hermes.py --hermes-root /path/to/hermes-agent \
 ```
 
 The last command runs against Hermes' real loader and manager in a temporary profile. Add `--live` for bounded paid Jev requests with `OPENROUTER_API_KEY`. It checks automatic user capture and memory injection after reopening, without any manual memory tool call. It does not simulate a full interactive agent conversation.
+
+## Conversation cost control
+
+To enable the optional conversation gate, add this to your existing Hermes configuration and restart Hermes:
+
+```yaml
+memory:
+  provider: perfectrecall
+  perfectrecall:
+    prefetch_mode: economy
+```
+
+Use `prefetch_mode: strict` to restore the default behavior. `PERFECTRECALL_PREFETCH_MODE=economy` is the environment equivalent; an explicit provider configuration takes precedence. Existing databases, automatic capture, and tool names remain compatible. Explicit memory tools always search their supplied question. No migration or new database is required.
+
+See [measurements, refresh rules, and reproduction](CONVERSATION_COST.md).

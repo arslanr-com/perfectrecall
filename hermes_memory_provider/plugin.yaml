@@ -1,5 +1,5 @@
 name: perfectrecall
-version: 0.1.0a2
+version: 0.1.0a3
 description: "PerfectRecall agent memory — typed Jev decisions and full-corpus recall; Mnemosyne-compatible Hermes tools."
 author: "Arslan (fork); Abdias J (upstream)"
 provides_tools:

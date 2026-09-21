@@ -1,0 +1,159 @@
+{
+  "synthetic": true,
+  "live_api": true,
+  "records": 10000,
+  "wheel_sha256": "753e7f0fab535f7f8c7d38b384af11f5d18d930217114f10889f26082ea6bb27",
+  "fixture_sha256": "ea1a943d7f200bb2a20c9810d0fe240a8a0143c4af9234b50fc150c4dcdeb1e5",
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "quality_measure": "Expected evidence present in injected context; no answer model or independent quality benchmark",
+  "cost_limit_note": "Stop threshold checked before requests; concurrent in-flight charges may exceed it",
+  "modes": {
+    "economy": {
+      "turns": [
+        {
+          "turn": 1,
+          "seconds": 4.6623329170106445,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 424,
+            "input_tokens": 2435946,
+            "output_tokens": 230193,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 474.1209947398456,
+            "cost_usd": 0.10230973199999971,
+            "priced_responses": 424,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "no_anchor"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 4.662209541973425
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 2,
+          "seconds": 2.0838816670002416,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": true,
+          "false_reuse": false,
+          "usage": {
+            "requests": 6,
+            "input_tokens": 2937,
+            "output_tokens": 233,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 3.643993417004822,
+            "cost_usd": 0.000123354,
+            "priced_responses": 6,
+            "decision_cache_hits": 13682,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "reuse_question",
+              "reason": "same_evidence",
+              "gate_score": 0.92,
+              "new_evidence_score": 0.12,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 582,
+                "output_tokens": 37,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 0.2814369169936981,
+                "cost_usd": 2.4444e-05,
+                "priced_responses": 1,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 0.28157824999652803
+            },
+            "context_injected": true,
+            "elapsed_seconds": 2.083601083024405
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 3,
+          "seconds": 0.8196606250130571,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": true,
+          "false_reuse": false,
+          "usage": {
+            "requests": 1,
+            "input_tokens": 603,
+            "output_tokens": 37,
+            "cache_hits": 4,
+            "failures": 0,
+            "seconds": 0.3287762499821838,
+            "cost_usd": 2.5326e-05,
+            "priced_responses": 1,
+            "decision_cache_hits": 13683,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "reuse_question",
+              "reason": "same_evidence",
+              "gate_score": 0.9,
+              "new_evidence_score": 0.12,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 603,
+                "output_tokens": 37,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 0.3287762499821838,
+                "cost_usd": 2.5326e-05,
+                "priced_responses": 1,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 0.32892954198177904
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.819370874989545
+          },
+          "scanned": 10000
+        }
+      ],
+      "evidence_hits": 3,
+      "false_reuses": 0,
+      "usage": {
+        "requests": 438,
+        "input_tokens": 2442298,
+        "output_tokens": 230774,
+        "cache_hits": 4,
+        "failures": 0,
+        "seconds": 480.47662036283873,
+        "resolved_model": "typesafe/jev-1.13-20260917",
+        "cost_usd": 0.1025765159999997,
+        "priced_responses": 438,
+        "decision_cache_hits": 27365,
+        "deadline_exceeded": 0
+      },
+      "automatic_capture": true,
+      "final_records": 10000
+    }
+  },
+  "total_cost_usd": 0.1025765159999997,
+  "status": "passed",
+  "economy_evidence_check_passed": true
+}

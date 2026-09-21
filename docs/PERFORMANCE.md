@@ -1,5 +1,7 @@
 # Performance and timeout recovery
 
+Conversation cost control in 0.1.0a3 has separate [sequential-dialogue measurements](CONVERSATION_COST.md). The results below describe the 0.1.0a2 retrieval work.
+
 The original problem was reproduced through Hermes' actual `MemoryManager`, using synthetic data in an isolated profile. With 241 eligible records and 242 evidence spans, the original serial duplicate-removal loop took 6.50 seconds after a 2.40-second relevance scan. Hermes returned at its eight-second timeout; its worker finished at 8.90 seconds. An immediate following call was skipped while that worker was still alive.
 
 ## Changes in 0.1.0a2

@@ -1492,6 +1492,11 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
         self._prefetch_profile = (
             os.environ.get("MNEMOSYNE_PREFETCH_PROFILE", "general").strip() or "general"
         )
+        self._prefetch_mode = os.environ.get("MNEMOSYNE_PREFETCH_MODE", "strict").strip().lower()
+        if self._prefetch_mode not in {"strict", "economy"}:
+            raise ValueError("prefetch_mode must be strict or economy")
+        from ._conversation_prefetch import ConversationPrefetch
+        self._conversation_prefetch = ConversationPrefetch()
         # Generic extra-source registry: name -> fn(query, *, session_id) -> hits|str.
         # A profile opts a source in via its `sources`. "bank" is built in.
         self._prefetch_sources: Dict[str, Callable[..., Any]] = {}
@@ -1626,6 +1631,15 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
 
         Precedence: kwargs > config.yaml > env var > hardcoded defaults.
         """
+        mode = kwargs.get("prefetch_mode")
+        if mode is None:
+            mode = self._read_config_key("prefetch_mode")
+        if mode is not None:
+            mode = str(mode).strip().lower()
+            if mode not in {"strict", "economy"}:
+                raise ValueError("prefetch_mode must be strict or economy")
+            self._prefetch_mode = mode
+        self._conversation_prefetch.clear()
         # auto_sleep: prefer kwargs, then config.yaml, then env var, defaulting
         # on to match Mnemosyne core's consolidation behavior for fresh installs.
         auto_sleep = kwargs.get("auto_sleep")
@@ -1859,6 +1873,7 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
 
     def get_config_schema(self) -> List[Dict[str, Any]]:
         return [
+            {"key": "prefetch_mode", "description": "strict searches each new message; economy lets Jev reuse a recent search question for supported follow-ups. Explicit recall always searches the supplied query. Economy refreshes after six reuses or five minutes.", "choices": ["strict", "economy"], "default": "strict"},
             {"key": "auto_sleep", "description": "Auto-run sleep() when working memory exceeds threshold. Set false to disable. Backward-compatible with MNEMOSYNE_AUTO_SLEEP_ENABLED env var.", "default": True},
             {"key": "sleep_threshold", "description": "Working memory count before auto-sleep triggers", "default": 50},
             {"key": "reflect", "description": "Reflection/sleep guardrails. Supports disabled_for_cron (default true) and max_calls_per_session (default 3; negative disables cap). Env: MNEMOSYNE_REFLECT_DISABLED_FOR_CRON, MNEMOSYNE_REFLECT_MAX_CALLS_PER_SESSION.", "default": {"disabled_for_cron": True, "max_calls_per_session": 3}},
@@ -2374,13 +2389,27 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
                 _echo_snapshot = self._verbatim_ledger.snapshot_for(_ledger_key)
                 if _echo_snapshot:
                     recall_kwargs["exclude_captures"] = _echo_snapshot
+            economy = getattr(self, "_prefetch_mode", "strict") == "economy"
+            trace = getattr(self, "_last_prefetch", {}).setdefault("conversation", {})
+            from mnemosyne.core.beam import _cross_session_enabled
+            cross_session = _cross_session_enabled() if economy else False
+            key = (id(self._beam), _ledger_key, self._beam.session_id,
+                   getattr(self._beam, "channel_id", None), author_id,
+                   self._agent_context, cross_session, repr(profile)) if economy else None
             with self._ensure_beam_access_lock():
+                if economy:
+                    recall_kwargs["query"] = self._conversation_prefetch.select(
+                        self._beam, key, query, author_id, trace, cross_session=cross_session)
+                else:
+                    trace.update(action="full_search", reason="strict_mode")
+                    self._conversation_prefetch.clear()
                 results = self._beam.recall(**recall_kwargs)
                 snapshot = recall_kwargs.get("exclude_captures")
                 if snapshot is not None and not snapshot.generation.valid:
                     recall_kwargs.pop("exclude_captures", None)
                     results = self._beam.recall(**recall_kwargs)
             if not results:
+                self._conversation_prefetch.clear()
                 return ""
             # Filter out low-relevance results to prevent context pollution.
             # Importance alone is not enough for silent injection: a memory must
@@ -2407,6 +2436,8 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
                 filtered = _semantic_dedup_prefetch(filtered)
             # Cap back to the intended injection size after over-fetch+filter.
             filtered = filtered[:profile.top_k]
+            if economy:
+                self._conversation_prefetch.remember(key, recall_kwargs["query"], query, filtered, trace)
             if not filtered:
                 return ""
             lines = ["## PerfectRecall Context"]
@@ -2426,6 +2457,7 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
                 lines.append(f"  [{ts}] (importance {imp:.2f}{source_tag}){trust_tag} {content}")
             return "\n".join(lines)
         except Exception as e:
+            self._conversation_prefetch.clear()
             logger.debug("Mnemosyne prefetch failed: %s", e)
             return ""
 
@@ -2651,6 +2683,10 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
         never suppress recall after the host rewinds.
         """
         del parent_session_id
+        with self._ensure_beam_access_lock():
+            cache = getattr(self, "_conversation_prefetch", None)
+            if cache is not None:
+                cache.clear()
         ledger = getattr(self, "_verbatim_ledger", None)
         previous = getattr(self, "_active_session_id", "") or ""
         self._active_session_id = str(new_session_id or "").strip()
@@ -3084,6 +3120,7 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
         ))
 
     def _handle_recall(self, args: Dict[str, Any]) -> str:
+        self._conversation_prefetch.clear()
         query = args.get("query", "")
         top_k = int(args.get("limit", 5))
         temporal_weight = float(args.get("temporal_weight", 0.0))
@@ -4375,6 +4412,7 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
     SHUTDOWN_DRAIN_TIMEOUT_SECONDS = _parse_env_float("MNEMOSYNE_SHUTDOWN_DRAIN_TIMEOUT", 2)
 
     def shutdown(self) -> None:
+        self._conversation_prefetch.clear()
         # If session_end's daemon thread is still consolidating when shutdown
         # arrives, briefly wait for it. Otherwise clearing the host backend
         # next would race with the in-flight summarize/extract call and a

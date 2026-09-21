@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.0a3 — Optional conversation cost control
+
+- Add `prefetch_mode: economy` for supported conversation follow-ups, using two short Jev decisions in one bounded request.
+- Reuse the original search question with the existing exact decision cache; re-read eligible storage, evaluate new or changed records, and rebuild context each turn.
+- Refresh on scope changes, edits to active evidence, expiry, resets, explicit recall, or after six reuses/five minutes. Gate errors fall back to a full search within the shared prefetch budget.
+- Keep strict prefetch as the default and explicit recall independent of the conversation gate.
+- Add conversation-cost and gate-probe scripts, real Hermes integration checks, and regression tests for privacy, mutations, and deadline recovery.
+
+Measured outcomes and their limits are in [conversation cost documentation](docs/CONVERSATION_COST.md). These are small synthetic development checks, not an independent final-answer quality benchmark.
+
 ## 0.1.0a2 — Batched recall and timeout recovery
 
 - Batch complete independent Jev evidence questions and reuse pooled HTTPS connections.

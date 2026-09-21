@@ -1,0 +1,659 @@
+{
+  "synthetic": true,
+  "live_api": false,
+  "records": 10000,
+  "wheel_sha256": "cc78fcfb2d26ebac4931a661a9b74c8e9ddf13cf0dc9721737e67da8790b0b26",
+  "fixture_sha256": "ea1a943d7f200bb2a20c9810d0fe240a8a0143c4af9234b50fc150c4dcdeb1e5",
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "quality_measure": "Expected evidence present in injected context; no answer model or independent quality benchmark",
+  "cost_limit_note": "Stop threshold checked before requests; concurrent in-flight charges may exceed it",
+  "modes": {
+    "strict": {
+      "turns": [
+        {
+          "turn": 1,
+          "seconds": 0.5926596249919385,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 421,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.02074811074999161,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.5925639169872738
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 2,
+          "seconds": 0.6212431659805588,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 422,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.026538827922195196,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6211751670052763
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 3,
+          "seconds": 0.6364877499872819,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 421,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 1,
+            "failures": 0,
+            "seconds": 0.02642498994828202,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6364171660097782
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 4,
+          "seconds": 0.6417434160248376,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 421,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.02822203768300824,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6416715829982422
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 5,
+          "seconds": 0.6558008330175653,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 421,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.033939783315872774,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.655717875022674
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 6,
+          "seconds": 0.642642666993197,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 436,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.03026462855632417,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6425614590116311
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 7,
+          "seconds": 0.6074109579785727,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 421,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.030491006997181103,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6073538750060834
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 8,
+          "seconds": 0.632944667013362,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 421,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.03348809326416813,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "strict_mode"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6328639579878654
+          },
+          "scanned": 10000
+        }
+      ],
+      "evidence_hits": 8,
+      "false_reuses": 0,
+      "usage": {
+        "requests": 3391,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_hits": 1,
+        "failures": 0,
+        "seconds": 0.23020422842819244,
+        "resolved_model": "scripted-test-double",
+        "cost_usd": 0.0,
+        "priced_responses": 0,
+        "decision_cache_hits": 0,
+        "deadline_exceeded": 0
+      },
+      "automatic_capture": true,
+      "final_records": 10000
+    },
+    "economy": {
+      "turns": [
+        {
+          "turn": 1,
+          "seconds": 0.5982294170244131,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 421,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.021180715906666592,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "no_anchor"
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.5981375419942196
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 2,
+          "seconds": 0.48284500002046116,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": true,
+          "false_reuse": false,
+          "usage": {
+            "requests": 3,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 4.379200981929898e-05,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 13682,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "reuse_question",
+              "reason": "same_evidence",
+              "gate_score": 0.99,
+              "new_evidence_score": 0.010000000000000009,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 1.2500007869675756e-05,
+                "cost_usd": 0,
+                "priced_responses": 0,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 5.05829812027514e-05
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.4827884170226753
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 3,
+          "seconds": 0.4753315419948194,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": true,
+          "false_reuse": false,
+          "usage": {
+            "requests": 1,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 1,
+            "failures": 0,
+            "seconds": 1.5707977581769228e-05,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 13683,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "reuse_question",
+              "reason": "same_evidence",
+              "gate_score": 0.99,
+              "new_evidence_score": 0.010000000000000009,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 1.5707977581769228e-05,
+                "cost_usd": 0,
+                "priced_responses": 0,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 5.2791001508012414e-05
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.4752689589804504
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 4,
+          "seconds": 0.7204237500263844,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 422,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.03526062335004099,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "new_evidence_needed",
+              "gate_score": 0.01,
+              "new_evidence_score": 0.99,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 1.3375014532357454e-05,
+                "cost_usd": 0,
+                "priced_responses": 0,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 4.77090070489794e-05
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.7203672090254258
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 5,
+          "seconds": 0.4917411250062287,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": true,
+          "false_reuse": false,
+          "usage": {
+            "requests": 1,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 1.4542019926011562e-05,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 13683,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "reuse_question",
+              "reason": "same_evidence",
+              "gate_score": 0.99,
+              "new_evidence_score": 0.010000000000000009,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 1.4542019926011562e-05,
+                "cost_usd": 0,
+                "priced_responses": 0,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 5.050000618211925e-05
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.4916665839846246
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 6,
+          "seconds": 0.6380810829869006,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 437,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.030043130042031407,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "new_evidence_needed",
+              "gate_score": 0.01,
+              "new_evidence_score": 0.99,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 1.5416007954627275e-05,
+                "cost_usd": 0,
+                "priced_responses": 0,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 5.5791984777897596e-05
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6380050420120824
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 7,
+          "seconds": 0.6600713749940041,
+          "expected_evidence_present": true,
+          "expected_reuse": false,
+          "reused": false,
+          "false_reuse": false,
+          "usage": {
+            "requests": 422,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 0.03681546539883129,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 0,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "full_search",
+              "reason": "new_evidence_needed",
+              "gate_score": 0.01,
+              "new_evidence_score": 0.99,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 1.62090000230819e-05,
+                "cost_usd": 0,
+                "priced_responses": 0,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 7.937499321997166e-05
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.6600042080099229
+          },
+          "scanned": 10000
+        },
+        {
+          "turn": 8,
+          "seconds": 0.5043807500042021,
+          "expected_evidence_present": true,
+          "expected_reuse": true,
+          "reused": true,
+          "false_reuse": false,
+          "usage": {
+            "requests": 1,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_hits": 0,
+            "failures": 0,
+            "seconds": 1.391599653288722e-05,
+            "cost_usd": 0,
+            "priced_responses": 0,
+            "decision_cache_hits": 13683,
+            "deadline_exceeded": 0
+          },
+          "prefetch": {
+            "status": "completed",
+            "budget_seconds": 6.5,
+            "conversation": {
+              "action": "reuse_question",
+              "reason": "same_evidence",
+              "gate_score": 0.99,
+              "new_evidence_score": 0.010000000000000009,
+              "gate_usage": {
+                "requests": 1,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "cache_hits": 0,
+                "failures": 0,
+                "seconds": 1.391599653288722e-05,
+                "cost_usd": 0,
+                "priced_responses": 0,
+                "decision_cache_hits": 0,
+                "deadline_exceeded": 0
+              },
+              "gate_seconds": 5.208299262449145e-05
+            },
+            "context_injected": true,
+            "elapsed_seconds": 0.5042991669906769
+          },
+          "scanned": 10000
+        }
+      ],
+      "evidence_hits": 8,
+      "false_reuses": 0,
+      "usage": {
+        "requests": 1715,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_hits": 1,
+        "failures": 0,
+        "seconds": 0.12346093374071643,
+        "resolved_model": "scripted-test-double",
+        "cost_usd": 0.0,
+        "priced_responses": 0,
+        "decision_cache_hits": 54731,
+        "deadline_exceeded": 0
+      },
+      "automatic_capture": true,
+      "final_records": 10000
+    }
+  },
+  "total_cost_usd": 0.0,
+  "status": "passed",
+  "economy_evidence_check_passed": true,
+  "cost_reduction_percent": null
+}
