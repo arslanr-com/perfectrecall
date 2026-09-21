@@ -8,6 +8,17 @@ PerfectRecall asks Jev to evaluate every eligible memory against short criteria 
 
 ## Install in Hermes
 
+For Hermes versions with Git plugin installation, install the directory plugin and run the native memory setup:
+
+```sh
+hermes plugins install https://github.com/arslanr-com/perfectrecall
+hermes memory setup perfectrecall
+```
+
+This installs the repository's code and declared Python dependencies without a separate PerfectRecall pip installation. The setup command backs up configuration, selects PerfectRecall, and disables legacy source plugins while keeping their files. Set `OPENROUTER_API_KEY` in the Hermes environment and restart. A catalog listing is being submitted; installation by the bare name `perfectrecall` requires its acceptance. [Installation and rollback](docs/INSTALLATION.md).
+
+### Install as a Python package
+
 Python 3.10 or newer is required. Install into **the same Python environment that runs Hermes**. On a standard Hermes installation:
 
 ```sh

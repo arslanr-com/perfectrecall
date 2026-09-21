@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -18,7 +19,9 @@ import zipfile
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--hermes-root',type=Path,required=True)
-    parser.add_argument('--wheel',type=Path,required=True)
+    installation = parser.add_mutually_exclusive_group(required=True)
+    installation.add_argument('--wheel',type=Path)
+    installation.add_argument('--plugin-dir', type=Path, help='Verify a directory plugin without pip installing PerfectRecall')
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--live',action='store_true')
     parser.add_argument('--records', type=int, default=0, help='Synthetic existing mixed-length records, up to 10000')
@@ -29,19 +32,36 @@ def main():
     # Bound the test's lifetime and keep the user's profile out of discovery.
     with tempfile.TemporaryDirectory(prefix='perfectrecall-hermes-') as directory:
         scratch=Path(directory);site=scratch/'site';home=scratch/'home'
-        with zipfile.ZipFile(args.wheel) as archive: archive.extractall(site)
+        if args.wheel:
+            with zipfile.ZipFile(args.wheel) as archive: archive.extractall(site)
+        else:
+            site = home/'plugins'/'perfectrecall'
+            shutil.copytree(args.plugin_dir, site, ignore=shutil.ignore_patterns(
+                '.git', 'build', 'dist', '*.egg-info', '__pycache__', '.pytest_cache', '.ruff_cache'))
         for key in tuple(os.environ):
             if key.startswith(('MNEMOSYNE_','PERFECTRECALL_','JEVOSYNE_')):del os.environ[key]
         os.environ.update(HERMES_HOME=str(home),PERFECTRECALL_HOST_LLM_ENABLED='0',
                           PERFECTRECALL_LLM_ENABLED='0')
-        sys.path[:0]=[str(site),str(args.hermes_root.resolve())]
-        from perfectrecall.install import configure_hermes
-        configure_hermes(home)
+        sys.path.insert(0, str(args.hermes_root.resolve()))
+        if args.wheel:
+            sys.path.insert(0, str(site))
+            from perfectrecall.install import configure_hermes
+            configure_hermes(home)
+        else:
+            # Real setup must discover and import the copied directory, with no
+            # installed package or repository path helping resolve its imports.
+            from hermes_cli.memory_setup import cmd_setup_provider
+            cmd_setup_provider('perfectrecall')
+            import yaml
+            assert yaml.safe_load((home/'config.yaml').read_text())['memory']['provider']=='perfectrecall'
         from plugins.memory import load_memory_provider, find_provider_entry_point
         from agent.memory_manager import MemoryManager
         from agent.memory_provider import MemoryProvider
         from mnemosyne.core import jev
-        assert find_provider_entry_point('perfectrecall') is not None
+        if args.wheel:
+            assert find_provider_entry_point('perfectrecall') is not None
+        else:
+            assert find_provider_entry_point('perfectrecall') is None, 'Use an environment without PerfectRecall installed'
         if args.live:
             client=jev.client();transport=client._transport
             def bounded(payload,timeout):
@@ -117,8 +137,9 @@ def main():
             initial_records=args.records, final_records=final_records, timings=timings,
             prefetch_mode=getattr(provider, '_prefetch_mode', 'strict'),
             hermes_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=args.hermes_root,text=True).strip(),
-            wheel_sha256=hashlib.sha256(args.wheel.read_bytes()).hexdigest(),
-            checks=dict(empty_profile=True,entrypoint_discovered=True,actual_host_abc=True,
+            wheel_sha256=hashlib.sha256(args.wheel.read_bytes()).hexdigest() if args.wheel else None,
+            installation='wheel' if args.wheel else 'directory-plugin',
+            checks=dict(empty_profile=True,provider_discovered=True,actual_host_abc=True,
                 automatic_capture=True,assistant_excluded=True,reopened_prefetch=True),usage=client.snapshot())
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(report,indent=2)+'\n')

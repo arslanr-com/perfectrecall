@@ -68,25 +68,25 @@ Build a wheel with `python -m build`. Use the Python environment that runs Herme
 # Offline contracts through actual Hermes, with scripted Jev responses.
 /path/to/hermes/venv/bin/python scripts/measure_conversation_cost.py \
   --hermes-root /path/to/hermes \
-  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a5-py3-none-any.whl \
   --records 10000 --output conversation-offline.json
 
 # Paid eight-turn comparison. OPENROUTER_API_KEY must be set in the environment.
 /path/to/hermes/venv/bin/python scripts/measure_conversation_cost.py \
   --hermes-root /path/to/hermes \
-  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a5-py3-none-any.whl \
   --records 256 --live --max-cost 0.10 --output conversation-live.json
 
 # One cold search plus two follow-ups at 10,000 records.
 /path/to/hermes/venv/bin/python scripts/measure_conversation_cost.py \
   --hermes-root /path/to/hermes \
-  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a5-py3-none-any.whl \
   --records 10000 --turns 3 --mode economy --live --max-cost 0.20 \
   --output conversation-10000.json
 
 # Gate-only cases; omit --live for a scripted contract check.
 python scripts/verify_conversation_gate.py \
-  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a5-py3-none-any.whl \
   --live --output gate-probes.json
 ```
 

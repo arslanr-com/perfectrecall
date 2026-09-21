@@ -10,6 +10,17 @@ class PerfectRecallMemoryProvider(MnemosyneMemoryProvider):
     def name(self):
         return "perfectrecall"
 
+    def post_setup(self, hermes_home, config):
+        """Use the same migration path from Hermes' native setup command."""
+        from pathlib import Path
+        from perfectrecall.install import configure_hermes
+
+        result = configure_hermes(Path(hermes_home))
+        config.setdefault("memory", {})["provider"] = "perfectrecall"
+        print("PerfectRecall selected. Set OPENROUTER_API_KEY in the Hermes environment and restart Hermes.")
+        if result["backup"]:
+            print("Previous configuration: " + result["backup"])
+
 
 def register_memory_provider(ctx):
     ctx.register_memory_provider(PerfectRecallMemoryProvider())

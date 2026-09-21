@@ -1,5 +1,29 @@
 # Installation and migration
 
+## Native Hermes plugin installation
+
+From version 0.1.0a5, the repository is also a directory plugin. In a Hermes installation with Git plugin support:
+
+```sh
+hermes plugins install https://github.com/arslanr-com/perfectrecall
+hermes memory setup perfectrecall
+```
+
+The second command uses the same configuration backup and legacy-plugin deactivation as the Python installer. Existing databases and memory banks remain in place. Set `OPENROUTER_API_KEY` in Hermes' environment and restart. Eligible memory text and queries are sent to the paid Jev API.
+
+The plugin loads its implementation from the installed checkout; it does not download or update itself at startup. Hermes installs the two required dependencies, PyYAML and httpx. The optional MCP and encrypted-sync extras still require their documented Python dependencies.
+
+The official catalog submission pins an exact commit. Until maintainers accept it, use the Git URL above. To undo a directory installation, select your previous memory provider, restore the configuration and legacy-plugin backup if needed, and remove PerfectRecall through `hermes plugins uninstall perfectrecall`. Keep your database backup if you also want to undo writes made after switching.
+
+To reproduce the directory-install contract check in a Python environment containing Hermes but no installed PerfectRecall package:
+
+```sh
+python scripts/verify_hermes.py --hermes-root /path/to/hermes-agent \
+  --plugin-dir . --output directory-install.json
+```
+
+This copies the plugin into a temporary profile and exercises native setup, discovery, automatic capture and retrieval after reopening. Jev responses are scripted by default, so the check makes no paid API calls and does not measure model quality or live latency.
+
 Install PerfectRecall in the Python environment running Hermes. Installing in an unrelated system Python does not make a provider discoverable by Hermes. The tested host commit is recorded in `benchmarks/results/hermes-lifecycle-offline.json`.
 
 ## First memory provider

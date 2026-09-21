@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.0a5 — Native Hermes plugin installation
+
+- Add a directory-plugin entry point so Hermes can install the repository directly from a pinned Git commit without a separate PerfectRecall package installation.
+- Route `hermes memory setup perfectrecall` through the existing configuration backup and migration logic.
+- Declare the exclusive provider, OpenRouter credential requirement, and provider-owned tools; remove obsolete general-plugin hook declarations.
+- Bound the two runtime dependency ranges and document directory installation and rollback.
+
+The Jev retrieval engine and economy mode are unchanged. This packaging release does not claim new quality or latency measurements.
+
 ## 0.1.0a4 — Economy prefetch by default
 
 - Enable economy prefetch by default for new and existing Hermes installations without an explicit mode setting.

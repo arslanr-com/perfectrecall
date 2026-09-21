@@ -56,6 +56,21 @@ def test_provider_registers_itself_before_class_discovery():
     assert context.provider.name==context.command=='perfectrecall'
 
 
+def test_native_setup_preserves_existing_bank_and_disables_old_plugin(tmp_path):
+    from perfectrecall.hermes import PerfectRecallMemoryProvider
+    original = {'memory': {'provider': 'mnemosyne', 'mnemosyne': {'bank': 'existing'}}}
+    (tmp_path/'config.yaml').write_text(yaml.safe_dump(original))
+    legacy = tmp_path/'plugins'/'mnemosyne'
+    legacy.mkdir(parents=True)
+    (legacy/'marker').write_text('old plugin')
+    PerfectRecallMemoryProvider().post_setup(str(tmp_path), original)
+    saved = yaml.safe_load((tmp_path/'config.yaml').read_text())
+    assert saved['memory']['provider'] == original['memory']['provider'] == 'perfectrecall'
+    assert saved['memory']['mnemosyne']['bank'] == 'existing'
+    assert not legacy.exists()
+    assert list((tmp_path/'plugins-disabled').glob('mnemosyne-*/marker'))
+
+
 def test_hermes_and_mcp_use_the_same_caller_guidance():
     from mnemosyne.tool_schemas import RECALL_SCHEMA as mcp
     from hermes_memory_provider import RECALL_SCHEMA as hermes
