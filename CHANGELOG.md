@@ -10,7 +10,7 @@
 - Fix immediate eviction of newly captured memories at capacity when timestamps tie.
 - Add reproducible latency, timeout, 10,000-record lifecycle, and paired quality checks.
 
-Live development results and final-wheel offline verification are distinguished in [performance documentation](docs/PERFORMANCE.md). The 12-case paired development check had no observed answer regressions. Final-wheel live reliability and automatic-write validation remain pending after the test key reached its configured spending cap.
+Live development results and final-wheel offline verification are distinguished in [performance documentation](docs/PERFORMANCE.md). The 12-case paired development check had no observed answer regressions. The final wheel passed a live 10,000-record automatic capture/reopen check and three-criterion recall for $0.37715. Automatic prefetch took 4.19 seconds; cold explicit three-criterion recall took 9.57 seconds. One run does not establish a production reliability guarantee.
 
 ## 0.1.0a1 — PerfectRecall publication candidate
 

@@ -12,6 +12,21 @@ The original problem was reproduced through Hermes' actual `MemoryManager`, usin
 - Native fanout also overlaps batches for structured facts and optional semantic lifecycle operations. The working-memory retention order preserves subsecond recency and resolves ties by insertion order, preventing a new write at capacity from evicting itself.
 - `mnemosyne_diagnose` includes per-call ranking, weighting, deduplication, finalization, and prefetch timings. Concurrent calls do not mix request counts. These added fields omit queries, criteria, and memory content; the inherited full diagnostic still contains database paths.
 
+## Final-wheel live check
+
+The published 0.1.0a2 wheel passed one live test through the actual Hermes loader and `MemoryManager`, starting with 10,000 mixed-length synthetic records. The test automatically captured a new user fact, reopened the provider, injected that fact before an answer, and ran an explicit search with all three supported criteria. It kept the normal retention policy; the final working set remained at 10,000 records.
+
+| Operation | Observed time |
+|---|---:|
+| Background automatic capture, through completion | 2.76 s |
+| Automatic prefetch after reopening | 4.19 s |
+| Explicit three-criterion search, cold | 9.57 s |
+| Same three-criterion search, warm | 0.73 s |
+
+The cold explicit search exceeds eight seconds; the automatic prefetch, which uses its default single criterion, completed within Hermes' eight-second window. These are different operations. The warm search reused 41,049 span/criterion decisions and made zero API requests. Total test usage was 1,498 API requests and **$0.377145132**, with zero API failures and zero decision deadlines. Automatic synchronization dispatched asynchronously; 2.76 seconds is its completion time, not blocking dispatch latency.
+
+The [aggregate report](../benchmarks/results/performance-a2/hermes-10000-live.json) identifies the tested wheel SHA-256 `b7e80fce81b4bb9ac1399572fd0cad96ca93823d21ba00c64933ded712bdc095` and resolved Jev model. This was one final-wheel check of the most demanding defined fixture, not every possible worst case. No repeated final-wheel reliability sweep was run, to keep API spending minimal. Earlier prototype repetitions are retained below; neither set proves a production latency percentile. No user memory or installed profile was used.
+
 ## Live development measurements
 
 These are development prototype measurements on 2026-09-21, not a production service-level guarantee or a final-wheel reliability certification. Reports include wheel hashes and the actual host commit. No private memory database was used.

@@ -2,7 +2,7 @@
 
 ## 0.1.0a2
 
-Verified locally on 2026-09-21. The following checks use the final candidate wheel or source. Live performance and quality results were collected on the preceding development prototype and are documented separately in [PERFORMANCE.md](PERFORMANCE.md).
+Verified locally on 2026-09-21. The following checks use the final candidate wheel or source. The final wheel also passed one live 10,000-record lifecycle and three-criterion search check. Earlier prototype performance and quality comparisons are documented separately in [PERFORMANCE.md](PERFORMANCE.md).
 
 | Check | Result |
 |---|---|
@@ -14,11 +14,11 @@ Verified locally on 2026-09-21. The following checks use the final candidate whe
 | Actual Hermes timeout recovery | Controlled timeout returned in 0.156 seconds for a 0.15-second budget; no lingering worker; immediate next call injected memory |
 | Existing upstream databases | Two banks, stored IDs/text, vector shadow tables, page backups and restores preserved |
 | MCP stdio | 29 tools, legacy names, stored-record read verified |
-| Final-wheel live 10,000-record lifecycle/reliability | Pending: configured API key spending cap exhausted |
+| Final-wheel live 10,000-record lifecycle | Passed: automatic capture 2.76 s; reopened prefetch 4.19 s; three-criterion recall 9.57 s cold / 0.73 s warm; $0.37715 total, no errors or deadlines |
 
 Tested wheel SHA-256: `b7e80fce81b4bb9ac1399572fd0cad96ca93823d21ba00c64933ded712bdc095`.
 
-[Machine-readable reports](../benchmarks/results/performance-a2/) distinguish `live_api: false` integration checks from live development timings. The user’s actual Hermes profile and memories were not changed.
+[Machine-readable reports](../benchmarks/results/performance-a2/) distinguish deterministic integration checks, live prototype timings, and the final-wheel [live lifecycle](../benchmarks/results/performance-a2/hermes-10000-live.json). One live final-wheel run does not establish a latency percentile or service-level guarantee. The user’s actual Hermes profile and memories were not changed.
 
 ## Historical 0.1.0a1 verification
 
