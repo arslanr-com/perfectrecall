@@ -1,7 +1,5 @@
 # PerfectRecall
 
-[![PerfectRecall: Jev-powered memory for AI agents. Frozen-build LongMemEval-S comparison with Mnemosyne: 72.6% fewer errors; accuracy increased from 48.3% to 85.8%. Works with Hermes, preserves your Mnemosyne database, and uses no embeddings.](docs/assets/perfectrecall-overview.png)](benchmarks/README.md)
-
 **Jev-powered memory for AI agents.** Try it on Hermes. Replace Mnemosyne while keeping your existing SQLite database, memory banks, and tool calls.
 
 An independent 120-question LongMemEval-S experiment reduced final-answer errors from **62 to 17 (72.6%)**, using the same GPT-5.6 Luna caller with high reasoning effort. Accuracy rose from **48.3% to 85.8%**. These are results for a frozen predecessor of this release, not a fresh validation of the renamed package or an official leaderboard score. [Methods, results, regressions, and reproduction](benchmarks/README.md).
