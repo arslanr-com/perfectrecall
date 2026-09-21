@@ -42,9 +42,9 @@ memory:
 
 ## Spend less on conversation follow-ups
 
-Opt into `memory.perfectrecall.prefetch_mode: economy` in Hermes, or set `PERFECTRECALL_PREFETCH_MODE=economy` before starting it. Jev checks whether a message can reuse the previous search question. Every turn still reads the eligible corpus; exact cached decisions avoid paying to evaluate unchanged memories again. New records are evaluated, and expired or inaccessible records are excluded.
+Economy prefetch is enabled by default in Hermes from 0.1.0a4. Jev checks whether a message can reuse the previous search question. Every turn still reads the eligible corpus; exact cached decisions avoid paying to evaluate unchanged memories again. New records are evaluated, and expired or inaccessible records are excluded.
 
-Explicit recall always searches the supplied question. The default `strict` mode searches each new message. Economy uses a heuristic gate and can miss a need for additional evidence; its tests and limits are described in [conversation cost measurements](docs/CONVERSATION_COST.md).
+Explicit recall always searches the supplied question. Set `memory.perfectrecall.prefetch_mode: strict` or `PERFECTRECALL_PREFETCH_MODE=strict` to search each new message. Economy uses a heuristic gate and can miss a need for additional evidence; its tests and limits are described in [conversation cost measurements](docs/CONVERSATION_COST.md).
 
 ## Use from Python or MCP
 

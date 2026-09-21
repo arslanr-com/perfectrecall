@@ -1,17 +1,17 @@
 # Conversation cost control
 
-PerfectRecall 0.1.0a3 adds an optional economy mode for automatic Hermes prefetch. In one eight-message synthetic conversation, it reduced total Jev cost by **55.6%** against strict mode, including an automatic memory write. The experiment used separate banks and cold client caches for each mode.
+PerfectRecall uses economy mode for automatic Hermes prefetch by default from 0.1.0a4. The mode was introduced and measured in 0.1.0a3. In one eight-message synthetic conversation, it reduced total Jev cost by **55.6%** against strict mode, including an automatic memory write. The experiment used separate banks and cold client caches for each mode.
 
-Enable it in Hermes and restart:
+No mode setting is required for economy. To choose strict prefetch instead, configure Hermes and restart:
 
 ```yaml
 memory:
   provider: perfectrecall
   perfectrecall:
-    prefetch_mode: economy
+    prefetch_mode: strict
 ```
 
-The equivalent environment variable is `PERFECTRECALL_PREFETCH_MODE=economy`. An explicit provider setting takes precedence. The default remains `strict`. No database migration is needed.
+The equivalent environment variable for strict mode is `PERFECTRECALL_PREFETCH_MODE=strict`. An explicit provider setting takes precedence. Set `prefetch_mode: economy` to return to the default. No database migration is needed.
 
 ## How it saves money
 
@@ -56,7 +56,7 @@ Sixteen separate synthetic gate probes accepted all five supported continuations
 - The gate has a 0.9-second budget inside the existing 6.5-second prefetch budget. Gate failure or uncertainty falls back to searching the new message. Required search failures return no bank context, preserving timeout recovery.
 - New topics require fresh decisions and may cost more than strict mode because of the extra gate call. Cache eviction, restarting Hermes, long memories, frequent writes and explicit tools also reduce savings.
 
-A model gate can incorrectly decide that no further evidence is needed. Strict mode preserves a fresh question for every new message and remains the default. The historical LongMemEval final-answer results do not validate economy mode. Savings depend on the conversation; the 55.6% figure is not a production-wide promise.
+A model gate can incorrectly decide that no further evidence is needed. Strict mode preserves a fresh question for every new message and is available as an explicit setting. The historical LongMemEval final-answer results do not validate economy mode. Savings depend on the conversation; the 55.6% figure is not a production-wide promise.
 
 Diagnostics include `prefetch.conversation.action`, reason codes, gate scores, timing and usage. These new fields contain no query or memory text. Overall experiment reports include capture cost; per-turn costs include the gate and retrieval.
 
@@ -68,25 +68,25 @@ Build a wheel with `python -m build`. Use the Python environment that runs Herme
 # Offline contracts through actual Hermes, with scripted Jev responses.
 /path/to/hermes/venv/bin/python scripts/measure_conversation_cost.py \
   --hermes-root /path/to/hermes \
-  --wheel dist/perfectrecall-0.1.0a3-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
   --records 10000 --output conversation-offline.json
 
 # Paid eight-turn comparison. OPENROUTER_API_KEY must be set in the environment.
 /path/to/hermes/venv/bin/python scripts/measure_conversation_cost.py \
   --hermes-root /path/to/hermes \
-  --wheel dist/perfectrecall-0.1.0a3-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
   --records 256 --live --max-cost 0.10 --output conversation-live.json
 
 # One cold search plus two follow-ups at 10,000 records.
 /path/to/hermes/venv/bin/python scripts/measure_conversation_cost.py \
   --hermes-root /path/to/hermes \
-  --wheel dist/perfectrecall-0.1.0a3-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
   --records 10000 --turns 3 --mode economy --live --max-cost 0.20 \
   --output conversation-10000.json
 
 # Gate-only cases; omit --live for a scripted contract check.
 python scripts/verify_conversation_gate.py \
-  --wheel dist/perfectrecall-0.1.0a3-py3-none-any.whl \
+  --wheel dist/perfectrecall-0.1.0a4-py3-none-any.whl \
   --live --output gate-probes.json
 ```
 

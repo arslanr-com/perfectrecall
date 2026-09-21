@@ -10,6 +10,6 @@ The repository contains synthetic integration fixtures and reduced benchmark res
 
 Report vulnerabilities privately through the repository's GitHub Security Advisories if enabled. Otherwise open an issue requesting a private contact channel without including credentials, memory contents, or an exploit against another person's data. There is no published security audit or production security certification.
 
-## Optional conversation gate
+## Conversation gate
 
-Economy prefetch sends the original search, the preceding message, the new message, and a bounded set of currently accessible memory text to Jev to decide whether the search question can be reused. Active evidence is checked against storage before this disclosure. This state stays in process memory and is cleared on session callbacks, reinitialization, explicit recall, and shutdown; it is eligible for reuse for at most five minutes or six follow-ups. No persistent conversation cache is added. The new diagnostic fields contain counters, timings, scores, and reason codes, not query or memory text.
+Economy prefetch, enabled by default from 0.1.0a4, sends the original search, the preceding message, the new message, and a bounded set of currently accessible memory text to Jev to decide whether the search question can be reused. Active evidence is checked against storage before this disclosure. This state stays in process memory and is cleared on session callbacks, reinitialization, explicit recall, and shutdown; it is eligible for reuse for at most five minutes or six follow-ups. No persistent conversation cache is added. The new diagnostic fields contain counters, timings, scores, and reason codes, not query or memory text.

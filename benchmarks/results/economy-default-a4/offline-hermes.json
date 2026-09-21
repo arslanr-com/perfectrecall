@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "live_api": false,
+  "manual_memory_tool_calls": 0,
+  "initial_records": 0,
+  "final_records": 1,
+  "timings": {
+    "sync_dispatch_seconds": 0.0002449170278850943,
+    "sync_completed_seconds": 0.024404167023021728,
+    "reopened_prefetch_seconds": 0.0020306669757701457
+  },
+  "prefetch_mode": "economy",
+  "hermes_commit": "4f22543509d1b91dc45bcb369447126c5eb14fb7",
+  "wheel_sha256": "cf98a70329af82ad13cc9c7544e474b97c9038b682acd8fcceb2a060f3909869",
+  "checks": {
+    "empty_profile": true,
+    "entrypoint_discovered": true,
+    "actual_host_abc": true,
+    "automatic_capture": true,
+    "assistant_excluded": true,
+    "reopened_prefetch": true
+  },
+  "usage": {
+    "requests": 8,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cache_hits": 0,
+    "failures": 0,
+    "seconds": 0.00014695801655761898,
+    "resolved_model": "test-double",
+    "cost_usd": 0.0,
+    "priced_responses": 0,
+    "decision_cache_hits": 0,
+    "deadline_exceeded": 0
+  }
+}

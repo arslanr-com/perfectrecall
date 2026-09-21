@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.0a4 — Economy prefetch by default
+
+- Enable economy prefetch by default for new and existing Hermes installations without an explicit mode setting.
+- Preserve explicit `prefetch_mode: strict` and environment overrides. Explicit recall continues to search the supplied question.
+- Update configuration help, documentation, and default-mode regression tests. The retrieval engine and Jev gate are unchanged from 0.1.0a3.
+
 ## 0.1.0a3 — Optional conversation cost control
 
 - Add `prefetch_mode: economy` for supported conversation follow-ups, using two short Jev decisions in one bounded request.

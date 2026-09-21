@@ -1,6 +1,6 @@
 """PerfectRecall compatibility namespace for existing Mnemosyne integrations."""
 
-__version__ = "0.1.0a3"
+__version__ = "0.1.0a4"
 __author__ = "Abdias J"
 __license__ = "MIT"
 

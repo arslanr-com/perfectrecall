@@ -1,7 +1,7 @@
-"""Opt-in conversational query reuse; every recall still walks visible storage.
+"""Conversational query reuse; every recall still walks visible storage.
 
 Only Jev's exact decision cache skips evaluation. Reusing the anchor question is
-heuristic, so explicit tools and the default strict mode always use the new query.
+heuristic, so explicit tools and the optional strict mode always use the new query.
 """
 from dataclasses import dataclass
 import time

@@ -53,15 +53,15 @@ The last command runs against Hermes' real loader and manager in a temporary pro
 
 ## Conversation cost control
 
-To enable the optional conversation gate, add this to your existing Hermes configuration and restart Hermes:
+Economy prefetch is enabled by default from 0.1.0a4. To use strict prefetch instead, add this to your existing Hermes configuration and restart Hermes:
 
 ```yaml
 memory:
   provider: perfectrecall
   perfectrecall:
-    prefetch_mode: economy
+    prefetch_mode: strict
 ```
 
-Use `prefetch_mode: strict` to restore the default behavior. `PERFECTRECALL_PREFETCH_MODE=economy` is the environment equivalent; an explicit provider configuration takes precedence. Existing databases, automatic capture, and tool names remain compatible. Explicit memory tools always search their supplied question. No migration or new database is required.
+Use `prefetch_mode: economy` to restore the default behavior. `PERFECTRECALL_PREFETCH_MODE=strict` is the environment equivalent for strict mode; an explicit provider configuration takes precedence. Existing databases, automatic capture, and tool names remain compatible. Explicit memory tools always search their supplied question. No migration or new database is required.
 
 See [measurements, refresh rules, and reproduction](CONVERSATION_COST.md).

@@ -7,6 +7,7 @@ from hermes_memory_provider import MnemosyneMemoryProvider
 @pytest.mark.parametrize('source,prefix', [('conversation', '[USER] '), ('fact', '')])
 def test_automatic_prefetch_uses_jev_relevance_without_embeddings(source, prefix):
     class Beam:
+        session_id = "test"
         author_id = None
 
         def recall(self, **kwargs):

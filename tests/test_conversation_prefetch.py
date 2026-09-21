@@ -39,7 +39,6 @@ def conversation(beam, monkeypatch):
     monkeypatch.setattr(jev, 'client', lambda: client)
     provider = MnemosyneMemoryProvider()
     provider._beam = beam
-    provider._prefetch_mode = 'economy'
     return provider, client, payloads, gate
 
 
@@ -129,9 +128,9 @@ def test_refresh_boundaries_do_not_call_gate(conversation, change):
     assert provider._last_prefetch['conversation']['action'] == 'full_search'
 
 
-def test_strict_default_and_explicit_recall_are_not_gated(conversation):
+def test_economy_default_and_explicit_recall_are_not_gated(conversation):
     provider, client, payloads, gate = conversation
-    assert MnemosyneMemoryProvider()._prefetch_mode == 'strict'
+    assert MnemosyneMemoryProvider()._prefetch_mode == 'economy'
     search(provider)
     payloads.clear()
     result = provider._handle_recall({'query': 'What is the Cedar database?', 'limit': 5})
@@ -195,3 +194,15 @@ def test_cross_session_setting_matches_recall_and_revocation(conversation, monke
     assert provider._last_prefetch['conversation']['reason'] == 'scope_changed'
     assert not any('reuse' in p['questions'] for p in payloads)
     assert 'PostgreSQL' not in json.dumps(payloads)
+
+
+def test_explicit_strict_setting_overrides_economy_default(monkeypatch):
+    monkeypatch.setenv('MNEMOSYNE_PREFETCH_MODE', 'strict')
+    provider = MnemosyneMemoryProvider()
+    assert provider._prefetch_mode == 'strict'
+    provider._apply_provider_config({'prefetch_mode': 'economy'})
+    assert provider._prefetch_mode == 'economy'
+    provider._apply_provider_config({'prefetch_mode': 'strict'})
+    assert provider._prefetch_mode == 'strict'
+    entry = next(x for x in provider.get_config_schema() if x['key'] == 'prefetch_mode')
+    assert entry['default'] == 'economy'

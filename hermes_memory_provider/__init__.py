@@ -1492,7 +1492,7 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
         self._prefetch_profile = (
             os.environ.get("MNEMOSYNE_PREFETCH_PROFILE", "general").strip() or "general"
         )
-        self._prefetch_mode = os.environ.get("MNEMOSYNE_PREFETCH_MODE", "strict").strip().lower()
+        self._prefetch_mode = os.environ.get("MNEMOSYNE_PREFETCH_MODE", "economy").strip().lower()
         if self._prefetch_mode not in {"strict", "economy"}:
             raise ValueError("prefetch_mode must be strict or economy")
         from ._conversation_prefetch import ConversationPrefetch
@@ -1873,7 +1873,7 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
 
     def get_config_schema(self) -> List[Dict[str, Any]]:
         return [
-            {"key": "prefetch_mode", "description": "strict searches each new message; economy lets Jev reuse a recent search question for supported follow-ups. Explicit recall always searches the supplied query. Economy refreshes after six reuses or five minutes.", "choices": ["strict", "economy"], "default": "strict"},
+            {"key": "prefetch_mode", "description": "strict searches each new message; economy lets Jev reuse a recent search question for supported follow-ups. Explicit recall always searches the supplied query. Economy refreshes after six reuses or five minutes.", "choices": ["strict", "economy"], "default": "economy"},
             {"key": "auto_sleep", "description": "Auto-run sleep() when working memory exceeds threshold. Set false to disable. Backward-compatible with MNEMOSYNE_AUTO_SLEEP_ENABLED env var.", "default": True},
             {"key": "sleep_threshold", "description": "Working memory count before auto-sleep triggers", "default": 50},
             {"key": "reflect", "description": "Reflection/sleep guardrails. Supports disabled_for_cron (default true) and max_calls_per_session (default 3; negative disables cap). Env: MNEMOSYNE_REFLECT_DISABLED_FOR_CRON, MNEMOSYNE_REFLECT_MAX_CALLS_PER_SESSION.", "default": {"disabled_for_cron": True, "max_calls_per_session": 3}},
@@ -2389,7 +2389,7 @@ class MnemosyneMemoryProvider(HermesPersonaPromptMixin, MemoryProvider):
                 _echo_snapshot = self._verbatim_ledger.snapshot_for(_ledger_key)
                 if _echo_snapshot:
                     recall_kwargs["exclude_captures"] = _echo_snapshot
-            economy = getattr(self, "_prefetch_mode", "strict") == "economy"
+            economy = getattr(self, "_prefetch_mode", "economy") == "economy"
             trace = getattr(self, "_last_prefetch", {}).setdefault("conversation", {})
             from mnemosyne.core.beam import _cross_session_enabled
             cross_session = _cross_session_enabled() if economy else False

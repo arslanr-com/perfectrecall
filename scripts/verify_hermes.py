@@ -115,6 +115,7 @@ def main():
         manager.shutdown_all()
         report=dict(status='passed',live_api=args.live,manual_memory_tool_calls=0,
             initial_records=args.records, final_records=final_records, timings=timings,
+            prefetch_mode=getattr(provider, '_prefetch_mode', 'strict'),
             hermes_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=args.hermes_root,text=True).strip(),
             wheel_sha256=hashlib.sha256(args.wheel.read_bytes()).hexdigest(),
             checks=dict(empty_profile=True,entrypoint_discovered=True,actual_host_abc=True,
